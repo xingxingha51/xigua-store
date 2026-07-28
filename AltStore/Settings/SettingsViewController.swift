@@ -677,7 +677,28 @@ private extension SettingsViewController
         // case .macDirtyCow:
         //     let isHidden = !(UserDefaults.standard.isCowExploitSupported && UserDefaults.standard.isDebugModeEnabled)
         //     return isHidden
-            
+
+        // Trimmed for this fork's audience — first-time sideloaders, for whom
+        // every extra row is a chance to break something. Hidden unconditionally
+        // rather than behind isDebugModeEnabled: that flag is force-enabled in
+        // simulator builds (the project defines DEBUG even in Release), so
+        // gating on it would behave differently per build config for no benefit
+        // — none of these have a use case in this fork.
+        //
+        // Deliberately NOT hidden: appRefresh (turning it off silently expires
+        // every installed app) and advancedSettings, which holds the anisette
+        // server picker and pairing-file reset — the two controls a stuck user
+        // actually needs.
+        case .patreon,      // upstream's donation links
+             .display,      // alternate icons, all SideStore-branded
+             .betaTesting:  // tracks upstream's beta channel, not ours
+            return true
+
+        // Account import/export: niche, but a real recovery path when moving
+        // devices, so keep it behind the existing debug gesture.
+        case .signing:
+            return !UserDefaults.standard.isDebugModeEnabled
+
         default: return false
         }
     }
