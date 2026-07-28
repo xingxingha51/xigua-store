@@ -1,0 +1,108 @@
+name: Build IPA
+
+# On demand only. An Xcode archive is a ~20 minute job; a README edit
+# shouldn't trigger one.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish the IPA under (e.g. v0.6.4-xigua.3)"
+        required: true
+      prerelease:
+        description: "Mark the release as a pre-release"
+        type: boolean
+        default: false
+
+concurrency:
+  group: ipa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # Matches upstream's CI. The project needs a recent Xcode; older images
+    # ship an SDK this codebase won't compile against.
+    runs-on: macos-26
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1.6.0
+        with:
+          xcode-version: "26.4"
+
+      # Only SwiftPM's checkouts are cached. DerivedData would be several GB
+      # and this repo shares a 10 GB cache allowance, so it isn't worth it for
+      # a job that runs occasionally.
+      - name: Cache SwiftPM
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/org.swift.swiftpm
+          key: spm-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: spm-
+
+      # Ad-hoc signing. The IPA ships unsigned so the user's sideloader
+      # re-signs it with their own Apple ID.
+      - name: Install ldid
+        run: brew install ldid
+
+      - name: Archive (unsigned)
+        run: |
+          xcodebuild archive \
+            -project AltStore.xcodeproj \
+            -scheme SideStore \
+            -archivePath ./XiguaStore \
+            -configuration Release \
+            -sdk iphoneos \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+
+      - name: Fakesign and package
+        run: |
+          make fakesign
+          make ipa
+          ls -lh XiguaStore.ipa
+
+      # Fail loudly rather than shipping an IPA that can't self-update: the
+      # app matches updates on its own bundle identifier, so the source must
+      # list an entry with exactly this value.
+      - name: Verify bundle identifier matches the source
+        run: |
+          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" \
+            XiguaStore.xcarchive/Products/Applications/XiguaStore.app/Info.plist)
+          echo "Built bundle id: $BUNDLE_ID"
+          SOURCE_URL=$(grep -o 'https://[^"]*apps\.json' AltStoreCore/Model/Source.swift | head -1)
+          echo "Self-update source: $SOURCE_URL"
+          if ! curl -fsSL "$SOURCE_URL" | grep -q "\"$BUNDLE_ID\""; then
+            echo "::error::Source $SOURCE_URL has no app with bundleIdentifier $BUNDLE_ID — self-update would silently never find an update."
+            exit 1
+          fi
+          echo "OK: source lists this bundle identifier."
+
+      # Published as a release asset, never as a build artifact: artifacts draw
+      # on a small pooled storage quota that hard-fails uploads once full, and
+      # a release also gives the app source a stable download URL.
+      - name: Publish to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ inputs.tag }}"
+          FLAGS=""
+          if [ "${{ inputs.prerelease }}" = "true" ]; then FLAGS="--prerelease"; fi
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" XiguaStore.ipa --clobber
+          else
+            gh release create "$TAG" XiguaStore.ipa \
+              --title "西瓜商店 $TAG" \
+              --notes "未签名的 ad-hoc 包，需用侧载工具以你自己的 Apple ID 签名后安装。" \
+              $FLAGS
+          fi
+
+          SIZE=$(stat -f%z XiguaStore.ipa)
+          echo "### 已发布 \`$TAG\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`size\`: **$SIZE** — 更新 apps.json 时要用这个值。" >> $GITHUB_STEP_SUMMARY
