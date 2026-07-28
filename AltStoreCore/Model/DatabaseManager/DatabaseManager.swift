@@ -382,14 +382,15 @@ private extension DatabaseManager
                 // Make sure to always update source URL to be current.
                 try! altStoreSource.setSourceURL(Source.altStoreSourceURL)
 
-                // Seed our own source alongside the official one. Only created
-                // when absent, so a user who removes it doesn't get it forced
-                // back on every launch.
-                if Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), Source.xiguaSourceIdentifier), in: context) == nil
+                // altStoreSource above is now ours (it has to be — it's the
+                // self-update feed). Seed upstream's alongside it so users still
+                // reach the wider community catalogue. Only created when absent,
+                // so removing it doesn't get undone on the next launch.
+                if Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), Source.sideStoreIdentifier), in: context) == nil
                 {
-                    _ = Source.make(name: Source.xiguaSourceName,
+                    _ = Source.make(name: Source.sideStoreSourceName,
                                     groupID: Source.altStoreGroupIdentifier,
-                                    sourceURL: Source.xiguaSourceURL,
+                                    sourceURL: Source.sideStoreSourceURL,
                                     context: context)
                 }
 

@@ -17,37 +17,24 @@ public extension Source
     static let altStoreGroupIdentifier = Bundle.Info.appbundleIdentifier
     #endif
     
-    #if STAGING
-    
-    #if ALPHA
-    static let altStoreSourceURL = URL(string: "https://apps.sidestore.io/")!
-    #else
-    static let altStoreSourceURL = URL(string: "https://apps.sidestore.io/")!
-    #endif
-    
-    #else
-    
-    #if ALPHA
-    static let altStoreSourceURL = URL(string: "https://sidestore.io/apps-v2.json/")!
-    #else
-    static let altStoreSourceURL = URL(string: "https://sidestore.io/apps-v2.json/")!
-    #endif
-    
-    #endif
-    
+    // This URL is not just the default source — it's where the app looks for
+    // updates to *itself*, matching on its own bundle identifier
+    // (`StoreApp.altstoreAppID`). Pointing it at ours is what makes self-update
+    // work; left on upstream's, no entry would ever match our bundle ID.
+    //
+    // Whatever this points at must therefore always list an app whose
+    // bundleIdentifier equals this build's own, or updates go silently missing.
+    static let altStoreSourceName = "西瓜商店"
+    static let altStoreSourceURL = URL(string: "https://sideloadstore.pages.dev/apps.json")!
+
     // normalized url is the source identifier (or) p-key!
     static let altStoreIdentifier = try! Source.sourceID(from: altStoreSourceURL)
 
-    // MARK: - Xigua fork
-
-    /// Our own app source, seeded on first launch so users don't have to add it
-    /// by hand.
-    ///
-    /// Deliberately separate from `altStoreSourceURL`: that one doubles as the
-    /// app's self-update feed, so replacing it would break self-updates.
-    static let xiguaSourceName = "西瓜商店"
-    static let xiguaSourceURL = URL(string: "https://sideloadstore.pages.dev/apps.json")!
-    static let xiguaSourceIdentifier = try! Source.sourceID(from: xiguaSourceURL)
+    /// Upstream's source, seeded alongside ours so users still reach the wider
+    /// community app catalogue. Not used for self-update.
+    static let sideStoreSourceName = "SideStore 官方源"
+    static let sideStoreSourceURL = URL(string: "https://sidestore.io/apps-v2.json/")!
+    static let sideStoreIdentifier = try! Source.sourceID(from: sideStoreSourceURL)
 }
 
  public extension Source
@@ -393,11 +380,11 @@ public extension Source
     class func makeAltStoreSource(in context: NSManagedObjectContext) -> Source
     {
         let source = Source(context: context)
-        source.name = "SideStore Offical"
+        source.name = Source.altStoreSourceName
         source.groupID = Source.altStoreGroupIdentifier
         source.identifier = Source.altStoreIdentifier
         try! source.setSourceURL(Source.altStoreSourceURL)
-        
+
         return source
     }
     
