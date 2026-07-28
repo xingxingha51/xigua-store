@@ -37,6 +37,17 @@ public extension Source
     
     // normalized url is the source identifier (or) p-key!
     static let altStoreIdentifier = try! Source.sourceID(from: altStoreSourceURL)
+
+    // MARK: - Xigua fork
+
+    /// Our own app source, seeded on first launch so users don't have to add it
+    /// by hand.
+    ///
+    /// Deliberately separate from `altStoreSourceURL`: that one doubles as the
+    /// app's self-update feed, so replacing it would break self-updates.
+    static let xiguaSourceName = "西瓜商店"
+    static let xiguaSourceURL = URL(string: "https://sideloadstore.pages.dev/apps.json")!
+    static let xiguaSourceIdentifier = try! Source.sourceID(from: xiguaSourceURL)
 }
 
  public extension Source
