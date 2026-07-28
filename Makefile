@@ -164,6 +164,11 @@ test:
 # BUILD_CONFIG ?= Debug		# switched to debug build-config to diagnose issue since debugger won't resolve breakpoints in release
 
 # Overrides (will inherit from env if set already)
+# Product name — must match PRODUCT_NAME in Build.xcconfig.
+APP_NAME ?= XiguaStore
+ARCHIVE  ?= $(APP_NAME).xcarchive
+APP_DIR  ?= $(ARCHIVE)/Products/Applications/$(APP_NAME).app
+
 BUILD_CONFIG ?= Release
 MARKETING_VERSION ?= 
 BUNDLE_ID_SUFFIX ?= 
@@ -192,7 +197,7 @@ endif
 build:
 	@echo ">>>>>>>>> BUILD_CONFIG is set to '$(BUILD_CONFIG)', Building for $(BUILD_CONFIG) mode! <<<<<<<<<<"
 	@echo ""
-	@xcodebuild archive -archivePath ./SideStore \
+	@xcodebuild archive -archivePath ./$(APP_NAME) \
 		$(COMMON_BUILD_SETTINGS)
 
 build-and-test:
@@ -250,20 +255,20 @@ clean-build:
 	@xcodebuild clean -project AltStore.xcodeproj -scheme SideStore
 
 fakesign-apps:
-	rm -rf SideStore.xcarchive/Products/Applications/SideStore.app/Frameworks/AltStoreCore.framework/Frameworks/
-	ldid -SAltStore/Resources/ReleaseEntitlements.plist SideStore.xcarchive/Products/Applications/SideStore.app/SideStore
-	ldid -SAltWidget/Resources/ReleaseEntitlements.plist SideStore.xcarchive/Products/Applications/SideStore.app/PlugIns/AltWidgetExtension.appex/AltWidgetExtension
+	rm -rf $(APP_DIR)/Frameworks/AltStoreCore.framework/Frameworks/
+	ldid -SAltStore/Resources/ReleaseEntitlements.plist $(APP_DIR)/$(APP_NAME)
+	ldid -SAltWidget/Resources/ReleaseEntitlements.plist $(APP_DIR)/PlugIns/AltWidgetExtension.appex/AltWidgetExtension
 
 fakesign-sidebackup:	
 	@echo ''
 	@echo "fake-signing sidebackup even though it will get resigned, only to retain its entitlements (appGroups)"
-	unzip -q -o SideStore.xcarchive/Products/Applications/SideStore.app/SideBackup.ipa -d SideStore.xcarchive/Products/Applications/SideStore.app/
-	ldid -SSideBackup/SideBackup.entitlements SideStore.xcarchive/Products/Applications/SideStore.app/Payload/SideBackup.app/SideBackup
-	pushd "SideStore.xcarchive/Products/Applications/SideStore.app/"  > /dev/null; \
+	unzip -q -o $(APP_DIR)/SideBackup.ipa -d $(APP_DIR)/
+	ldid -SSideBackup/SideBackup.entitlements $(APP_DIR)/Payload/SideBackup.app/SideBackup
+	pushd "$(APP_DIR)/"  > /dev/null; \
 	rm -f     SideBackup.ipa; \
 	zip -r SideBackup.ipa Payload; \
 	popd  > /dev/null
-	@rm -rf SideStore.xcarchive/Products/Applications/SideStore.app/Payload
+	@rm -rf $(APP_DIR)/Payload
 
 fakesign: fakesign-apps fakesign-sidebackup				
 
@@ -271,10 +276,10 @@ fakesign: fakesign-apps fakesign-sidebackup
 ipa:
 	@echo ''
 	@echo "fake-signing sidestore"
-	mkdir -p Payload/SideStore.app
-	cp -R SideStore.xcarchive/Products/Applications/SideStore.app/ Payload/SideStore.app/
-	rm -f     SideStore.ipa
-	zip -r SideStore.ipa Payload
+	mkdir -p Payload/$(APP_NAME).app
+	cp -R $(APP_DIR)/ Payload/$(APP_NAME).app/
+	rm -f     $(APP_NAME).ipa
+	zip -qr $(APP_NAME).ipa Payload
 	rm -rf Payload*/
 
 # Global Variables
@@ -384,5 +389,5 @@ clean-sidebackup:
     #@rm -f AltStore/Resources/SideBackup.ipa
 
 clean: clean-sidebackup
-	@rm -rf SideStore.ipa
+	@rm -rf $(APP_NAME).ipa
 	@rm -rf build/

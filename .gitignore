@@ -13,6 +13,7 @@ build/
 DerivedData
 
 SideStore.xcarchive
+XiguaStore.xcarchive
 ## Various settings
 *.pbxuser
 !default.pbxuser
@@ -41,6 +42,7 @@ xcuserdata
 
 Payload/
 **/SideStore.ipa
+**/XiguaStore.ipa
 **/SideBackup.ipa
 **/*.dSYM
 
