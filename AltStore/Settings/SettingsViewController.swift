@@ -62,6 +62,16 @@ extension SettingsViewController
         case operations
         case designer
         case softwareLicenses
+
+        /// Only the row that opens the secondary page. The other three just
+        /// link out to upstream's social accounts, which don't belong on a
+        /// fork's main settings list.
+        ///
+        /// Attribution isn't lost: this row segues to LicensesViewController,
+        /// and the repo carries upstream's LICENSE, README and authorship.
+        /// Collapsed to zero height rather than filtered from allCases — see
+        /// AdvancedSettingsRow.visible for why that matters here.
+        static let visible: Set<CreditsRow> = [.softwareLicenses]
     }
     
     private enum TechyThingsRow: Int, CaseIterable
@@ -1105,6 +1115,12 @@ extension SettingsViewController
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat
     {
         let section = Section.allCases[indexPath.section]
+
+        if section == .credits {
+            let row = CreditsRow.allCases[indexPath.row]
+            guard CreditsRow.visible.contains(row) else { return 0 }
+        }
+
         if section == .advancedSettings {
             let row = AdvancedSettingsRow.allCases[indexPath.row]
 
@@ -1303,6 +1319,8 @@ extension SettingsViewController
             
         case .credits:
             let row = CreditsRow.allCases[indexPath.row]
+            // Zero-height rows can still register a tap; ignore the hidden ones.
+            guard CreditsRow.visible.contains(row) else { return }
             switch row
             {
             case .developer: self.openTwitter(username: "sidestoreio")

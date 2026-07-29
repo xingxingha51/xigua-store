@@ -79,7 +79,7 @@
 /* ---- 设置分组 ---- */
 "DISPLAY" = "显示";
 "TECHY THINGS" = "技术选项";
-"CREDITS" = "致谢";
+"CREDITS" = "关于";
 "ADVANCED SETTINGS" = "高级设置";
 "DIAGNOSTICS" = "诊断";
 "SIGNING" = "签名";
