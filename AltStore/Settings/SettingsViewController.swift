@@ -87,6 +87,24 @@ extension SettingsViewController
         case customizeAppId         // row 12 - Enable AppId Customization
         case customizeAppExtensions // row 13 - Enable AppExtns Customization
         case cellularRefresh        // row 14 - Enable Cellular Refresh (< iOS 26.4)
+
+        /// Rows a stuck user actually needs. Everything else in this section is
+        /// power-user tooling, and two entries are actively hazardous here:
+        /// certificate management can revoke the signing certificate (killing
+        /// every installed app), and App ID customization can burn through the
+        /// free account's 10-per-week App ID quota.
+        ///
+        /// Note this does NOT filter `allCases`. Cells come from the storyboard
+        /// via `super.tableView(_:cellForRowAt:)`, which indexes by row number,
+        /// so dropping middle entries would leave the visible cell and the tap
+        /// handler pointing at different rows. Hidden rows are collapsed to zero
+        /// height instead, keeping indices aligned.
+        static let visible: Set<AdvancedSettingsRow> = [
+            .anisetteServers,   // login fails when a public server is down;
+                                // switching is the fix, so this must stay
+            .resetPairingFile,  // the only self-service fix for a broken pairing
+            .sendFeedback,      // a way to reach us when those don't help
+        ]
     }
     
     private enum SigningSettingsRow: Int, CaseIterable {
@@ -691,13 +709,10 @@ private extension SettingsViewController
         // actually needs.
         case .patreon,      // upstream's donation links
              .display,      // alternate icons, all SideStore-branded
-             .betaTesting:  // tracks upstream's beta channel, not ours
+             .betaTesting,  // tracks upstream's beta channel, not ours
+             .signing,      // account import/export — device migration, not setup
+             .diagnostics:  // developer tooling; two rows wipe all user data
             return true
-
-        // Account import/export: niche, but a real recovery path when moving
-        // devices, so keep it behind the existing debug gesture.
-        case .signing:
-            return !UserDefaults.standard.isDebugModeEnabled
 
         default: return false
         }
@@ -1092,6 +1107,10 @@ extension SettingsViewController
         let section = Section.allCases[indexPath.section]
         if section == .advancedSettings {
             let row = AdvancedSettingsRow.allCases[indexPath.row]
+
+            // Collapse the power-user rows this fork doesn't expose.
+            guard AdvancedSettingsRow.visible.contains(row) else { return 0 }
+
             if row == .wirelessPair {
                 if #available(iOS 26.0, *) {
                     return super.tableView(tableView, heightForRowAt: indexPath)
@@ -1299,6 +1318,8 @@ extension SettingsViewController
             
         case .advancedSettings:
             let row = AdvancedSettingsRow.allCases[indexPath.row]
+            // Zero-height rows can still register a tap; ignore the hidden ones.
+            guard AdvancedSettingsRow.visible.contains(row) else { return }
             switch row
             {
             case .sendFeedback:
