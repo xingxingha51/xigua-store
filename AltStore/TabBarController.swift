@@ -25,6 +25,17 @@ extension TabBarController
         /// announcements, and Sources is redundant now that ours is seeded
         /// automatically — both stay reachable in code, just not on the bar.
         static let visible: [Tab] = [.browse, .myApps, .settings]
+
+        var localizedTitle: String {
+            switch self
+            {
+            case .news: return NSLocalizedString("News", comment: "")
+            case .sources: return NSLocalizedString("Sources", comment: "")
+            case .browse: return NSLocalizedString("Browse", comment: "")
+            case .myApps: return NSLocalizedString("My Apps", comment: "")
+            case .settings: return NSLocalizedString("Settings", comment: "")
+            }
+        }
     }
 }
 
@@ -64,6 +75,15 @@ final class TabBarController: UITabBarController
         // Show only the tabs in Tab.visible. The hidden ones stay in
         // allViewControllers so deep links can still reach them.
         self.viewControllers = Tab.visible.map { self.allViewControllers[$0.rawValue] }
+
+        // Set titles here rather than via Main.strings: the Settings tab is a
+        // storyboard placeholder, so its title comes from the referenced
+        // storyboard and a Main.strings override silently has no effect.
+        for tab in Tab.visible
+        {
+            guard let index = Tab.visible.firstIndex(of: tab) else { continue }
+            self.viewControllers?[index].tabBarItem.title = tab.localizedTitle
+        }
     }
 
     /// Position of a tab on the *visible* bar, or nil when it's hidden.

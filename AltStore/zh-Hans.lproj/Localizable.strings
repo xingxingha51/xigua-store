@@ -1,0 +1,128 @@
+/* 简体中文本地化
+ *
+ * 只翻译用户实际会点、会读的文案。刻意保留英文的有:
+ *   - 产品/组件名: SideStore, SideJITServer, LiveContainer, Anisette, Apple ID,
+ *     JIT, IPA, Wi-Fi, VPN — 这些在教程和社区里都用英文,翻了反而对不上
+ *   - 深层调试项(minimuxer / 数据库 / 日志),普通用户不会进
+ *
+ * 未在此列出的键会回退到英文原文,不会显示成键名。
+ */
+
+/* ---- 通用动作 ---- */
+"OK" = "好";
+"Cancel" = "取消";
+"Delete" = "删除";
+"Remove" = "移除";
+"Done" = "完成";
+"Open" = "打开";
+"Refresh" = "刷新";
+"Try Again" = "重试";
+"Export" = "导出";
+"Enable" = "启用";
+"Disable" = "停用";
+"Help" = "帮助";
+"Info" = "详情";
+"Unknown" = "未知";
+"Today" = "今天";
+"Loading..." = "加载中…";
+"Calculating…" = "计算中…";
+
+/* ---- 主界面 ---- */
+"Browse" = "发现";
+"My Apps" = "我的应用";
+"Settings" = "设置";
+"Sources" = "软件源";
+"News" = "公告";
+"Installed" = "已安装";
+"Refresh All" = "全部刷新";
+"No Updates Available" = "暂无可用更新";
+"Updates" = "可用更新";
+"No Apps" = "暂无应用";
+"Sort by…" = "排序方式…";
+"New & Updated" = "最新与更新";
+"Categories" = "分类";
+"Featured" = "精选";
+"Search" = "搜索";
+/* The install button uppercases this itself — the key is "Free", not "FREE". */
+"Free" = "免费";
+"See All" = "查看全部";
+"Expires in" = "剩余";
+"Version %@" = "版本 %@";
+"Update %@" = "更新 %@";
+
+/* ---- 应用分类 ---- */
+"Entertainment" = "娱乐";
+"Games" = "游戏";
+"Lifestyle" = "生活";
+"Photo & Video" = "照片与视频";
+"Social" = "社交";
+"Utilities" = "工具";
+"Other" = "其他";
+
+/* ---- 账号 ---- */
+"ACCOUNT" = "账号";
+"Sign Out" = "退出登录";
+"SIGN OUT" = "退出登录";
+"Developer" = "开发者";
+
+/* ---- 续签 ---- */
+"REFRESHING APPS" = "自动续签";
+"Background Refresh" = "后台自动刷新";
+"Disable Idle Timeout" = "刷新时不自动锁屏";
+"How it works" = "工作原理";
+
+/* ---- 分组说明文字 ---- */
+"Sign in with your Apple ID to download apps from SideStore." = "登录 Apple ID 后才能安装应用。建议用小号,不要用主账号。";
+"Enable Background Refresh to automatically refresh apps in the background when connected to Wi-Fi. \n\nEnable Disable Idle Timeout to allow SideStore to keep your device awake during a refresh or install of any apps." = "开启「后台自动刷新」后,连着 Wi-Fi 时会自动为应用续签,不用手动操作。\n\n开启「刷新时不自动锁屏」可避免刷新或安装过程中因锁屏而中断失败。";
+"Free up disk space by removing non-essential data, such as temporary files and backups for uninstalled apps." = "清理临时文件和已卸载应用的备份,腾出存储空间。";
+
+/* ---- 设置分组 ---- */
+"DISPLAY" = "显示";
+"TECHY THINGS" = "技术选项";
+"CREDITS" = "致谢";
+"ADVANCED SETTINGS" = "高级设置";
+"DIAGNOSTICS" = "诊断";
+"SIGNING" = "签名";
+"SUPPORT US" = "支持我们";
+"BETA TESTING" = "测试版";
+
+/* ---- 设置项 ---- */
+"Health Check" = "一键检测";
+"View Error Log" = "查看错误日志";
+"Clear Data Cache…" = "清理缓存…";
+"Clear Cache" = "清理缓存";
+"Send Feedback" = "反馈问题";
+"View Refresh Attempts" = "查看续签记录";
+"Reset Pairing File" = "重新配对设备";
+"Pairing File Reset" = "配对已重置";
+"Pairing File" = "配对文件";
+"Are you sure to reset the pairing file?" = "确定要重置配对文件吗?";
+"Please restart SideStore" = "请重新启动 App";
+"Connection Config" = "连接设置";
+"Cache Management" = "缓存管理";
+"Certificate Management" = "证书管理";
+"Wireless Pairing" = "无线配对";
+"Network Discovery" = "局域网发现";
+"Server Address" = "服务器地址";
+"Licenses" = "开源许可";
+
+/* ---- 证书 ---- */
+"Export Certificate" = "导出证书";
+"Certificate imported successfully!" = "证书导入成功!";
+"Please enter the password for the certificate." = "请输入证书密码。";
+"Failed to import certificate!" = "证书导入失败!";
+"Failed to export certificate!" = "证书导出失败!";
+"Failed to encode certificate!" = "证书编码失败!";
+"Failed to find certificate or password" = "找不到证书或密码";
+"Failed to import account certificate!" = "账号证书导入失败!";
+"Failed to export account!" = "账号导出失败!";
+"Failed to export account data!" = "账号数据导出失败!";
+
+/* ---- 错误与提示 ---- */
+"Operation Failed" = "操作失败";
+"Unable to Add Source" = "无法添加软件源";
+"Cannot Send Mail" = "无法发送邮件";
+"Delete and Reset" = "删除并重置";
+"Restore Backup" = "恢复备份";
+"Permission" = "权限";
+"Search FAQ" = "搜索常见问题";

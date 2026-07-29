@@ -1,0 +1,78 @@
+/* Settings.storyboard 简体中文
+ *
+ * 设置页的行标题是 storyboard 里的静态单元格,不走 NSLocalizedString,
+ * 所以必须在这里按对象 ID 翻译。
+ *
+ * 保留英文的:产品名(SideStore / SideJITServer / Anisette / Apple ID / Siri /
+ * Minimuxer / EMP / wireguard)、人名、邮箱。这些在教程和社区里都用英文,
+ * 翻译反而对不上号。
+ *
+ * 未列出的 ID 会保持 storyboard 里的英文原文,不会显示成 ID。
+ */
+
+/* 导航标题 */
+"Ddg-UQ-KJ8.title" = "设置";
+
+/* 账号 */
+"7lu-Yk-87t.text" = "使用 Apple ID 登录";
+
+/* 续签 */
+"EbG-HB-IOn.text" = "后台自动刷新";
+"PCh-Up-aJJ.text" = "刷新时不自动锁屏";
+"c6K-fI-CVr.text" = "允许 Siri 触发刷新…";
+"W95-fD-NAd.text" = "解除应用数量限制";
+"Fq6-2u-Lge.text" = "允许使用蜂窝网络刷新";
+"2CC-iw-3bd.text" = "工作原理";
+
+/* 技术选项 */
+"hlt-Ch-lbl.text" = "一键检测";
+"vH6-7i-tCE.text" = "查看错误日志";
+"j4e-Mz-DlL.text" = "清理缓存…";
+
+/* 致谢 */
+"434-MW-Den.text" = "开发者";
+"oqY-wY-1Vf.text" = "界面设计";
+"fGU-Fp-XgM.text" = "视觉设计";
+"D6b-cd-pVK.text" = "开源许可";
+
+/* 高级设置 */
+"pMI-Aj-nQF.text" = "反馈问题";
+"sni-07-q0M.text" = "查看续签记录";
+"ysS-9s-dXm.text" = "重新配对设备";
+"eds-Dj-36y.text" = "Anisette 服务器";
+"iie-Nj-lki.text" = "连接设置";
+"cac-Mn-lbl.text" = "缓存管理";
+"crt-Mg-lbl.text" = "证书管理";
+"wrl-Pr-lbl.text" = "无线配对";
+"nDc-Bj-lbl.text" = "局域网发现";
+"d5F-bf-6kB.text" = "导出已签名的应用";
+"Y4l-PD-ev9.text" = "更换应用图标";
+"3Il-5a-5Zp.text" = "支持团队";
+
+/* 签名 / 账号数据 */
+"WPe-mj-W7t.text" = "导出签名证书…";
+"rv6-S1-2gw.text" = "导入签名证书…";
+"jts-UA-M8d.text" = "导入账号…";
+"uHg-iq-d36.text" = "导出账号…";
+
+/* 测试版 */
+"1B5-BJ-Rkb.text" = "接收测试版更新";
+"nSh-L8-ca0.text" = "测试版通道";
+
+/* 诊断 */
+"jFh-36-AP2.text" = "禁用响应缓存";
+"7bz-tI-tLY.text" = "详细操作日志";
+"Ho1-To-wve.text" = "导出数据库…";
+"CcF-9x-Eu8.text" = "删除数据库…";
+"LW3-gm-lj5.text" = "操作日志设置";
+"ZRk-8S-kBQ.text" = "下次启动时重建数据库";
+
+/* 错误详情弹窗 */
+"xvY-lN-Toz.text" = "名称";
+"Sge-cM-Fw9.text" = "类型";
+"4MX-Qv-H8V.text" = "日期";
+"R5a-wv-xHd.text" = "错误代码";
+"1df-ri-hKN.text" = "错误描述";
+"rAc-lQ-B1k.text" = "邮箱";
+"SWb-Of-t97.text" = "成功";
+"7L1-AA-2yo.text" = "无法连接到 SideStore。";

@@ -1,0 +1,16 @@
+/* Main.storyboard 简体中文
+ *
+ * 键是 storyboard 里的对象 ID。改动 storyboard 里对应控件时,ID 一般不变;
+ * 但如果删掉重建了控件,这里的键就会失效(表现为回退成英文,不会崩溃)。
+ */
+
+/* 标签栏 */
+"Uwh-Bg-Ymq.title" = "发现";
+"4gT-9u-k7y.title" = "我的应用";
+"OZm-Le-7oJ.title" = "设置";
+"fVN-ed-uO1.title" = "公告";
+
+/* 导航栏大标题 */
+"pUx-6k-rtr.title" = "发现";
+"zLJ-Cg-ijh.title" = "我的应用";
+"ZxL-Ws-lJO.title" = "公告";
