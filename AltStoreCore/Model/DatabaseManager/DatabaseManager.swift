@@ -440,8 +440,19 @@ private extension DatabaseManager
                                                                            #keyPath(InstalledApp.resignedBundleIdentifier), ourBundleID),
                                                    in: context)
                 {
-                    legacy.bundleIdentifier = StoreApp.altstoreAppID
-                    legacy.storeApp = storeApp
+                    // Installing from the Browse tab while still on an old build
+                    // creates a row under the new ID, leaving two records for one
+                    // app. Rename only when the new ID is free; otherwise the
+                    // legacy row is the duplicate and goes.
+                    if let current = storeApp.installedApp, current != legacy
+                    {
+                        context.delete(legacy)
+                    }
+                    else
+                    {
+                        legacy.bundleIdentifier = StoreApp.altstoreAppID
+                        legacy.storeApp = storeApp
+                    }
                 }
 
                 let serialNumber = Bundle.main.object(forInfoDictionaryKey: Bundle.Info.certificateID) as? String
