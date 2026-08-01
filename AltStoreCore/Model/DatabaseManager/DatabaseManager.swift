@@ -413,6 +413,22 @@ private extension DatabaseManager
                 // it. Deleting sources on the user's behalf isn't worth the
                 // chance of removing one they wanted.
 
+                // Older builds seeded upstream's catalogue alongside ours. The
+                // seeding is gone, but anyone who already got it is stuck with it:
+                // this build hides the Sources tab and has no add/remove source
+                // UI, so there is no way for them to take it out by hand.
+                //
+                // Removed once, then left alone — the flag is in .standard so it
+                // survives whichever container the app group resolves to.
+                if !UserDefaults.standard.didRemoveSeededUpstreamSource
+                {
+                    if let upstream = Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), Source.sideStoreIdentifier), in: context)
+                    {
+                        context.delete(upstream)
+                    }
+                    UserDefaults.standard.didRemoveSeededUpstreamSource = true
+                }
+
                 let storeApp: StoreApp
                 
                 if let app = StoreApp.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(StoreApp.bundleIdentifier), StoreApp.altstoreAppID), in: context)

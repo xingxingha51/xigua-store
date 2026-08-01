@@ -58,6 +58,13 @@ public extension UserDefaults
         set { self.set(newValue, forKey: #function) }
     }
 
+    /// One-shot: the upstream SideStore source seeded by older builds has been
+    /// removed. In `.standard` for the same reason as the other flags.
+    @objc var didRemoveSeededUpstreamSource: Bool {
+        get { self.bool(forKey: #function) }
+        set { self.set(newValue, forKey: #function) }
+    }
+
     @objc var didMigrateOutOfAppGroup: Bool {
         get { self.bool(forKey: #function) }
         set { self.set(newValue, forKey: #function) }
