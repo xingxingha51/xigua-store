@@ -257,7 +257,14 @@ clean-build:
 fakesign-apps:
 	rm -rf $(APP_DIR)/Frameworks/AltStoreCore.framework/Frameworks/
 	ldid -SAltStore/Resources/ReleaseEntitlements.plist $(APP_DIR)/$(APP_NAME)
-	ldid -SAltWidget/Resources/ReleaseEntitlements.plist $(APP_DIR)/PlugIns/AltWidgetExtension.appex/AltWidgetExtension
+	@# The widget is no longer embedded — isideload can't provision app extensions,
+	@# so a bundled .appex ships without a profile and the app refuses to launch.
+	@# Left conditional rather than deleted so this still works if it comes back.
+	@if [ -e "$(APP_DIR)/PlugIns/AltWidgetExtension.appex/AltWidgetExtension" ]; then \
+		ldid -SAltWidget/Resources/ReleaseEntitlements.plist $(APP_DIR)/PlugIns/AltWidgetExtension.appex/AltWidgetExtension; \
+	else \
+		echo "skipping widget fakesign (not embedded)"; \
+	fi
 
 fakesign-sidebackup:	
 	@echo ''
