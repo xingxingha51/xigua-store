@@ -94,7 +94,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				BF989177250AABF4002ACF50 /* AltWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
