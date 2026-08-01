@@ -30,6 +30,24 @@ jobs:
         with:
           submodules: recursive
 
+      # The store decides "update available" by comparing the semantic version
+      # of CFBundleShortVersionString against what the source declares
+      # (InstalledApp.hasUpdate). A fixed 0.6.4 across every fork release means
+      # the two are always equal and self-update never fires — so derive the
+      # version from the release tag instead of hardcoding it. `v0.6.4-xigua.12`
+      # becomes `0.6.4-xigua.12`, and SemVer compares the `12` numerically.
+      - name: Stamp version from tag
+        run: |
+          VERSION="${TAG#v}"
+          if ! printf '%s' "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "::error::tag '$TAG' is not a semantic version (expected e.g. v0.6.4-xigua.12)"
+            exit 1
+          fi
+          sed -i '' "s|^MARKETING_VERSION = .*|MARKETING_VERSION = $VERSION|" Build.xcconfig
+          grep -E '^(MARKETING_VERSION|CURRENT_PROJECT_VERSION)' Build.xcconfig
+        env:
+          TAG: ${{ inputs.tag }}
+
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1.6.0
         with:

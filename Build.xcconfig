@@ -1,6 +1,10 @@
 // Configuration settings file format documentation can be found at:
 // https://help.apple.com/xcode/#/dev745c5c974
 
+// Release builds get this stamped from the tag by .github/workflows/xigua-build.yml
+// (v0.6.4-xigua.12 -> 0.6.4-xigua.12). It has to differ between fork releases or
+// the store's update check never fires — see InstalledApp.hasUpdate. The value
+// here is only what local builds report.
 MARKETING_VERSION = 0.6.4
 CURRENT_PROJECT_VERSION = 0604
 
