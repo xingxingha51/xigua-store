@@ -1,4 +1,4 @@
-# 西瓜商店 (XiguaStore)
+# 西瓜IPA助手 (XiguaStore)
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
@@ -13,11 +13,11 @@
 ## 这个分支改了什么
 
 ### 品牌
-- 应用名 **西瓜商店**,独立 Bundle ID `com.xiguastore.XiguaStore`,不与官方 SideStore 冲突
+- 应用名 **西瓜IPA助手**,独立 Bundle ID `com.xiguastore.XiguaStore`,不与官方 SideStore 冲突
 - 换成西瓜图标(iOS 要求图标不透明、且系统自己切圆角,所以源图铺了白底、未预切圆角)
 
 ### 内置软件源
-首次启动自动添加「西瓜商店」源,用户不用手动加。
+首次启动自动添加「西瓜IPA助手」源,用户不用手动加。
 
 源**追加**在官方源旁边而不是替换它——`altStoreSourceURL` 同时是 App 的自我更新通道,替换掉就没法自更新了。用户手动删掉后也不会在下次启动被塞回来。
 

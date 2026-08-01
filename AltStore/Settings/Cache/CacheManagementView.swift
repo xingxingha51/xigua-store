@@ -20,7 +20,7 @@ struct CacheManagementView: View {
                     .scaleEffect(1.1)
             } else {
                 List {
-                    Section(header: Text("Internal App Cache"), footer: Text("解压后的应用包缓存,存放在西瓜商店的私有目录里,用于后台自动续签和重新签名。")) {
+                    Section(header: Text("Internal App Cache"), footer: Text("解压后的应用包缓存,存放在西瓜IPA助手的私有目录里,用于后台自动续签和重新签名。")) {
                         if viewModel.internalApps.isEmpty {
                             Text("No cached internal apps.")
                                 .foregroundColor(.secondary)

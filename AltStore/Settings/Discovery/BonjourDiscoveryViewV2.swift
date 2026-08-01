@@ -64,7 +64,7 @@ struct BonjourDiscoveryViewV2: View {
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                 
-                Text("**设置 → 应用 → 西瓜商店 → 本地网络 = 打开**")
+                Text("**设置 → 应用 → 西瓜IPA助手 → 本地网络 = 打开**")
                     .font(.caption.bold())
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -152,7 +152,7 @@ struct ServiceTypesViewV2: View {
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                 
-                Text("**设置 → 应用 → 西瓜商店 → 本地网络 = 打开**")
+                Text("**设置 → 应用 → 西瓜IPA助手 → 本地网络 = 打开**")
                     .font(.caption.bold())
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
@@ -278,7 +278,7 @@ struct ServiceInstancesViewV2: View {
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
                 
-                Text("**设置 → 应用 → 西瓜商店 → 本地网络 = 打开**")
+                Text("**设置 → 应用 → 西瓜IPA助手 → 本地网络 = 打开**")
                     .font(.caption.bold())
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)

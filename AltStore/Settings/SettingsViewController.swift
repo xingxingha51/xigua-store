@@ -340,7 +340,7 @@ final class SettingsViewController: UITableViewController
             Keychain.shared.signingCertificate = altCert.encryptedP12Data(withPassword: "")!
             Keychain.shared.signingCertificatePassword = account.certpass
             let format = NSLocalizedString("Successfully imported '%@'!", comment: "")
-            let toastView = ToastView(text: String(format: format, account.email), detailText: "西瓜商店现在可以正常使用了。")
+            let toastView = ToastView(text: String(format: format, account.email), detailText: "西瓜IPA助手现在可以正常使用了。")
             return toastView.show(in: self)
         } catch {
             let toastView = ToastView(text: NSLocalizedString("Failed to import account certificate!", comment: ""), detailText: "Error: \(error.localizedDescription). Still imported account/adi.pb details!")
@@ -1581,7 +1581,7 @@ extension SettingsViewController
                     } else {
                         let alert = UIAlertController(
                             title: "Local Network Access Required",
-                            message: "西瓜商店需要本地网络权限才能搜索 AltServer,请在系统设置里开启。",
+                            message: "西瓜IPA助手需要本地网络权限才能搜索 AltServer,请在系统设置里开启。",
                             preferredStyle: .alert
                         )
                         alert.addAction(UIAlertAction(title: "Settings", style: .default) { _ in

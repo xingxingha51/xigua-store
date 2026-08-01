@@ -23,8 +23,8 @@ struct TextLockScreenWidget: Widget
                 ComplicationView(entry: entry, style: .text)
             }
             .supportedFamilies([.accessoryCircular])
-            .configurationDisplayName("西瓜商店(文字)")
-            .description("查看西瓜商店的剩余有效天数。")
+            .configurationDisplayName("西瓜IPA助手(文字)")
+            .description("查看西瓜IPA助手的剩余有效天数。")
         }
         else
         {
@@ -46,8 +46,8 @@ struct IconLockScreenWidget: Widget
                 ComplicationView(entry: entry, style: .icon)
             }
             .supportedFamilies([.accessoryCircular])
-            .configurationDisplayName("西瓜商店(图标)")
-            .description("查看西瓜商店的剩余有效天数。")
+            .configurationDisplayName("西瓜IPA助手(图标)")
+            .description("查看西瓜IPA助手的剩余有效天数。")
         }
         else
         {

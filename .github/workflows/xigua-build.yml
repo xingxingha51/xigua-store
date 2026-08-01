@@ -115,7 +115,7 @@ jobs:
             gh release upload "$TAG" XiguaStore.ipa --clobber
           else
             gh release create "$TAG" XiguaStore.ipa \
-              --title "西瓜商店 $TAG" \
+              --title "西瓜IPA助手 $TAG" \
               --notes "未签名的 ad-hoc 包，需用侧载工具以你自己的 Apple ID 签名后安装。" \
               $FLAGS
           fi

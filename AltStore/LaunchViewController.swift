@@ -171,7 +171,7 @@ final class LaunchViewController: UIViewController, UIDocumentPickerDelegate {
     @MainActor
     func displayError(_ msg: String) {
         debugLog("[SideStore] \(msg)")
-        let alert = UIAlertController(title: "无法启动西瓜商店", message: msg, preferredStyle: .alert)
+        let alert = UIAlertController(title: "无法启动西瓜IPA助手", message: msg, preferredStyle: .alert)
         self.present(alert, animated: true)
     }
     
@@ -207,7 +207,7 @@ final class LaunchViewController: UIViewController, UIDocumentPickerDelegate {
             // entry — the format string has to be the key, with the email
             // substituted afterwards.
             let format = NSLocalizedString("Successfully imported '%@'!", comment: "")
-            let toastView = ToastView(text: String(format: format, account.email), detailText: "西瓜商店现在可以正常使用了。")
+            let toastView = ToastView(text: String(format: format, account.email), detailText: "西瓜IPA助手现在可以正常使用了。")
             return toastView.show(in: self)
         } catch {
             let toastView = ToastView(text: NSLocalizedString("Failed to import account certificate!", comment: ""), detailText: "Error: \(error.localizedDescription). Still imported account/adi.pb details!")

@@ -5,13 +5,13 @@
  * 保留英文:Apple ID、Wi-Fi、VPN、LocalDevVPN、Keychain —— 都是用户在系统
  * 设置和教程里看到的原词。
  *
- * 「Welcome to SideStore.」改写成本分支的名字,否则用户装的是「西瓜商店」
+ * 「Welcome to SideStore.」改写成本分支的名字,否则用户装的是「西瓜IPA助手」
  * 却被欢迎到 SideStore,会以为装错了。
  */
 
 /* 登录页 */
 "nDc-Zs-wnK.title" = "关闭";
-"EI2-V3-zQZ.text" = "欢迎使用西瓜商店";
+"EI2-V3-zQZ.text" = "欢迎使用西瓜IPA助手";
 "SNU-tv-8Au.text" = "登录 Apple ID 后即可开始安装应用。";
 "59N-O1-6bM.text" = "APPLE ID";
 "Ava-XY-7vs.text" = "密码";
@@ -30,16 +30,16 @@
 /* 首次引导 */
 "bCq-Jq-gf1.title" = "使用说明";
 "JeJ-bk-UCA.text" = "安装应用";
-"M7T-9j-uyt.text" = "直接在西瓜商店里浏览和安装应用。";
+"M7T-9j-uyt.text" = "直接在西瓜IPA助手里浏览和安装应用。";
 "nvb-Aq-sYa.text" = "自动续签";
 "HU5-Hv-E3d.text" = "只要 VPN 保持连接,应用会在后台自动续签。";
 "esj-pD-D4A.text" = "连接 Wi-Fi 与 VPN";
 "4rk-ge-FSj.text" = "打开 LocalDevVPN,随时随地都能续签。";
-"XKD-XH-eB0.text" = "打开西瓜商店";
-"6HP-Xh-sAH.text" = "让西瓜商店在后台保持运行。";
+"XKD-XH-eB0.text" = "打开西瓜IPA助手";
+"6HP-Xh-sAH.text" = "让西瓜IPA助手在后台保持运行。";
 "qZ9-AR-2zK.normalTitle" = "知道了";
 
 /* 续签提示 */
-"5nk-NR-jtV.title" = "续签西瓜商店";
+"5nk-NR-jtV.title" = "续签西瓜IPA助手";
 "xcg-hT-tDe.normalTitle" = "立即续签";
 "qua-VA-asJ.normalTitle" = "稍后再说";
