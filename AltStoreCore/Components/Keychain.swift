@@ -54,11 +54,11 @@ public class Keychain
     /// bytes but can't lose credentials if this runs half-way.
     private func migrateFromDefaultAccessGroupIfNeeded()
     {
-        guard Keychain.pinnedAccessGroup != nil, !UserDefaults.standard.didMigrateKeychainAccessGroup else { return }
+        // Nothing to copy when we stayed on the default group — source and
+        // destination would be the same keychain.
+        guard self.didPinAccessGroup, !UserDefaults.standard.didMigrateKeychainAccessGroup else { return }
 
-        let fallback = KeychainAccess.Keychain(service: Bundle.Info.appbundleIdentifier)
-            .accessibility(.afterFirstUnlock)
-            .synchronizable(true)
+        let fallback = Keychain.defaultKeychain
 
         for key in fallback.allKeys()
         {
@@ -84,13 +84,59 @@ public class Keychain
     /// `application-identifier` is exactly `<TeamID>.<bundleID>`, which is a
     /// concrete group both entitlement shapes grant: it *is* AltSign's default,
     /// and it falls under isideload's wildcard.
-    public let keychain: KeychainAccess.Keychain = {
-        let base = KeychainAccess.Keychain(service: Bundle.Info.appbundleIdentifier)
-        guard let accessGroup = Keychain.pinnedAccessGroup else { return base.accessibility(.afterFirstUnlock).synchronizable(true) }
-        return KeychainAccess.Keychain(service: Bundle.Info.appbundleIdentifier, accessGroup: accessGroup)
+    /// Pinned to `<TeamID>.<bundleID>` instead of letting iOS pick a default.
+    ///
+    /// The default depends on the `keychain-access-groups` entitlement, and the
+    /// two installers disagree about it: isideload signs with the provisioning
+    /// profile's entitlements verbatim, which carry Apple's `<TeamID>.*`
+    /// wildcard, while AltSign strips the key when the app doesn't declare it.
+    /// Different defaults mean credentials written under one installer are
+    /// invisible under the other — that is why the saved Apple ID "vanished"
+    /// after updating in-store.
+    ///
+    /// `application-identifier` is exactly `<TeamID>.<bundleID>`: it *is*
+    /// AltSign's default, and it falls under isideload's wildcard.
+    public private(set) var keychain = Keychain.defaultKeychain
+    private var didPinAccessGroup = false
+
+    private static var defaultKeychain: KeychainAccess.Keychain {
+        KeychainAccess.Keychain(service: Bundle.Info.appbundleIdentifier)
             .accessibility(.afterFirstUnlock)
             .synchronizable(true)
-    }()
+    }
+
+    /// Switches to the pinned group, but only after proving we can write to it.
+    ///
+    /// If the entitlement doesn't actually grant it — an App ID prefix that
+    /// isn't the team ID, an unexpected profile — every write would fail
+    /// silently and the user would be asked to sign in on every launch. Falling
+    /// back to the default keychain keeps the old (inconsistent) behaviour
+    /// rather than a broken one.
+    private func adoptPinnedAccessGroupIfWritable()
+    {
+        guard let accessGroup = Keychain.pinnedAccessGroup else { return }
+
+        let pinned = KeychainAccess.Keychain(service: Bundle.Info.appbundleIdentifier, accessGroup: accessGroup)
+            .accessibility(.afterFirstUnlock)
+            .synchronizable(true)
+
+        let probeKey = "accessGroupProbe"
+        do
+        {
+            try pinned.set("1", key: probeKey)
+            guard try pinned.getString(probeKey) == "1" else { return }
+            try? pinned.remove(probeKey)
+        }
+        catch
+        {
+            debugLog("[Keychain] Access group \(accessGroup) is not writable, staying on the default. \(error)")
+            return
+        }
+
+        self.keychain = pinned
+        self.didPinAccessGroup = true
+    }
+
 
     private static var pinnedAccessGroup: String? {
         guard let app = ALTApplication(fileURL: Bundle.main.bundleURL),
@@ -145,6 +191,7 @@ public class Keychain
     
     private init()
     {
+        self.adoptPinnedAccessGroupIfWritable()
         self.migrateFromDefaultAccessGroupIfNeeded()
         self.migrateLegacyKeychainItems()
     }

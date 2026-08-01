@@ -14,7 +14,10 @@ import AltStoreCore
 import AltSign
 
 private extension UIColor {
-    static let altInvertedPrimary = UIColor(named: "SettingsHighlighted")!
+    /// Was SettingsHighlighted — a dark purple that read as a tint on the old
+    /// coloured backdrop. That colorset is now a background shade, so tinting
+    /// with it would make controls invisible; use the app tint instead.
+    static let altInvertedPrimary = UIColor.altPrimary
 }
 
 typealias AuthenticationError = AuthenticationErrorCode.Error
