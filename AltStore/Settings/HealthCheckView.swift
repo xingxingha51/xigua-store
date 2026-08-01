@@ -334,7 +334,7 @@ struct HealthCheckView: View {
                             Text("Action Required")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                            Text(err.localizedDescription)
+                            Text(localizedDiagnosticMessage(err.localizedDescription))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
@@ -355,7 +355,7 @@ struct HealthCheckView: View {
             Section(header: Text("账号状态"),
                     footer: Text("导入账号只会写入邮箱、密码、adi.pb 和证书;会话缓存要等一次成功登录后才有。adi.pb 只在签发它的那台 Anisette 服务器上有效。")) {
                 DependencyRow(title: "Apple ID",
-                              subtitle: Keychain.shared.appleIDEmailAddress ?? "未存储",
+                              subtitle: Keychain.shared.appleIDEmailAddress.map { "\($0)" } ?? "未存储",
                               isSatisfied: Keychain.shared.appleIDEmailAddress != nil)
                 DependencyRow(title: "密码",
                               subtitle: Keychain.shared.appleIDPassword != nil ? "已存储" : "未存储",
@@ -370,7 +370,7 @@ struct HealthCheckView: View {
                               subtitle: Keychain.shared.session != nil ? "有(可跳过登录)" : "无(每次都要完整登录)",
                               isSatisfied: Keychain.shared.session != nil)
                 DependencyRow(title: "Anisette 服务器",
-                              subtitle: UserDefaults.standard.menuAnisetteURL,
+                              subtitle: "\(UserDefaults.standard.menuAnisetteURL)",
                               isSatisfied: !UserDefaults.standard.menuAnisetteURL.isEmpty)
             }
 
@@ -489,8 +489,12 @@ struct HealthCheckView: View {
 }
 
 struct DependencyRow: View {
-    let title: String
-    let subtitle: String
+    // LocalizedStringKey, not String: Text(String) skips localization entirely,
+    // so every literal passed in here would stay English no matter what the
+    // .strings file says. Interpolated values (an email, a URL) pass through
+    // unlocalized, which is what we want for them.
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
     let isSatisfied: Bool?
     
     var body: some View {
@@ -558,3 +562,37 @@ struct InterfaceRow: View {
         }
     }
 }
+
+/// Minimuxer builds its diagnostic strings in the dependency (a separate
+/// package we don't localize), so they arrive here already-formatted English.
+/// Look the text up in our .strings anyway: an exact key wins, otherwise a
+/// known prefix is translated and whatever the dependency interpolated onto
+/// the end is kept verbatim.
+func localizedDiagnosticMessage(_ message: String) -> String {
+    // Errors reach us as "InvalidVPN: <text>"; only <text> comes from minimuxer.
+    let prefix: String
+    let body: String
+    if let range = message.range(of: ": "), message[..<range.lowerBound].allSatisfy({ !$0.isWhitespace }) {
+        prefix = String(message[..<range.upperBound])
+        body = String(message[range.upperBound...])
+    } else {
+        prefix = ""
+        body = message
+    }
+
+    let exact = NSLocalizedString(body, comment: "")
+    if exact != body { return prefix + exact }
+
+    for stem in diagnosticMessageStems where body.hasPrefix(stem) {
+        let translated = NSLocalizedString(stem, comment: "")
+        guard translated != stem else { break }
+        return prefix + translated + String(body.dropFirst(stem.count))
+    }
+    return message
+}
+
+/// Leading clauses of minimuxer messages that end in interpolated detail.
+private let diagnosticMessageStems = [
+    "Remote endpoint IP is not configured or reachable.",
+    "VPN tunnel iface is up but tunnel peer IP is not yet reachable — VPN may not be routing device traffic correctly.",
+]
