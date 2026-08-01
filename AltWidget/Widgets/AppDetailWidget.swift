@@ -29,8 +29,8 @@ struct AppDetailWidget: Widget
                 AppDetailWidgetView(apps: entry.apps, date: entry.date, isPlaceholder: entry.isPlaceholder)
             }
             .supportedFamilies([.systemSmall])
-            .configurationDisplayName("App Status")
-            .description("View remaining days until your sideloaded apps expire. Tap the countdown timer to refresh them in the background.")
+            .configurationDisplayName("应用状态")
+            .description("查看已侧载应用的剩余天数。点击倒计时可在后台续签。")
             .contentMarginsDisabled()
         }
         else
@@ -44,8 +44,8 @@ struct AppDetailWidget: Widget
                 AppDetailWidgetView(apps: entry.apps, date: entry.date, isPlaceholder: entry.isPlaceholder)
             }
             .supportedFamilies([.systemSmall])
-            .configurationDisplayName("App Status")
-            .description("View remaining days until your sideloaded apps expire. Tap the countdown timer to refresh them in the background.")
+            .configurationDisplayName("应用状态")
+            .description("查看已侧载应用的剩余天数。点击倒计时可在后台续签。")
         }
     }
 }

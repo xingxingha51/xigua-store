@@ -126,3 +126,47 @@
 "Restore Backup" = "恢复备份";
 "Permission" = "权限";
 "Search FAQ" = "搜索常见问题";
+
+
+/* ---- 上游文案里出现产品名的句子 ---- */
+"%@ is not added to SideStore." = "%@ 尚未添加到西瓜商店。";
+"Are you sure you want to clear SideStore's cache?\n\nCache Size: %@" = "确定要清理西瓜商店的缓存吗?\n\n缓存大小:%@";
+"Failed to Refresh SideStore" = "西瓜商店续签失败";
+"Free developer accounts are limited to 1 active signing certificate. Since the private key for the active certificate was not found on this device, SideStore will create a new certificate. This will automatically revoke the active certificate, which may disable installations on other devices or made by Xcode." = "免费开发者账号只能有 1 张有效签名证书。本机找不到当前证书的私钥,西瓜商店将新建一张证书,原证书会被自动吊销 —— 你在其他设备上、或用 Xcode 安装的应用可能因此失效。";
+"One or more apps in source “%@” are missing a marketplaceID. This most likely means they are not notarized, which is not supported by this version of SideStore." = "软件源“%@”里有应用缺少 marketplaceID,通常说明它们没有经过 Apple 公证,当前版本不支持。";
+"Personalize your SideStore experience by choosing an alternate app icon." = "换一个备用图标,让它更像你自己的。";
+"Remove “%@” from SideStore?" = "要移除“%@”吗?";
+"SideStore Expiring Soon" = "西瓜商店即将过期";
+"SideStore News" = "西瓜商店公告";
+"SideStore can only install marketplace apps that have been notarized by Apple." = "只能安装经过 Apple 公证的应用市场应用。";
+"SideStore cannot manage the existing certificate without owning its private key. The apps signed with the existing certificate will expire soon unless they are resigned and renewed explicitly by SideStore." = "没有私钥就无法管理现有证书。用这张证书签名的应用很快会过期,除非重新签名续期。";
+"SideStore could not determine this device's UDID. Please replace your pairing using iloader." = "无法获取本机 UDID,请用西瓜IPA安装助手重新放置配对文件。";
+"SideStore does not have detailed information for these entitlements." = "没有这些权限的详细说明。";
+"SideStore is unable to reach the device endpoint.\n\nPlease check your Connection Configuration in Settings to ensure the IP and endpoint are correct." = "连接不上设备端点。\n\n请到「设置 → 连接设置」检查 IP 和端点是否正确。";
+"SideStore needs to deactivate another app before installing %@." = "安装 %@ 前需要先停用另一个应用。";
+"SideStore was denied permission to launch %@." = "没有权限启动 %@。";
+"SideStore was installed by a different signing tool (like Xcode or AltStore)." = "西瓜商店是用别的签名工具(如 Xcode 或 AltStore)安装的。";
+"SideStore will expire in 24 hours. Open the app and refresh it to prevent it from expiring." = "西瓜商店将在 24 小时后过期,打开它刷新一次即可继续使用。";
+"SideStore's database could not be saved." = "数据库保存失败。";
+"SideStore's shared app group could not be accessed." = "无法访问共享 App Group。";
+"Sources determine what apps are available in SideStore. The more sources you add, the better your SideStore experience will be.\n\nDon’t know where to start? Try adding one of our Recommended Sources!" = "软件源决定了你能装到哪些应用。加的源越多,能选的应用越多。\n\n不知道从哪开始?先试试推荐的软件源。";
+"Support the SideStore Team by following our socials or becoming a patron!" = "关注 SideStore 团队的社交账号或成为赞助者,支持上游开发。";
+"The default SideStore source cannot be removed." = "默认软件源不能移除。";
+"The more you open SideStore, the more chances it's given to refresh apps in the background." = "你越常打开西瓜商店,系统给它后台续签的机会就越多。";
+"The more you use SideStore, the more often iOS will allow it to refresh apps in the background." = "你用得越多,iOS 允许它后台续签的频率就越高。";
+"The provisioning profile for SideStore is corrupt or missing." = "西瓜商店的描述文件损坏或丢失。";
+"The signing certificate used to install SideStore has expired." = "安装西瓜商店所用的签名证书已过期。";
+"The signing certificate used to install SideStore was revoked on the Apple Developer portal." = "安装西瓜商店所用的签名证书已在 Apple 开发者网站被吊销。";
+"The source “%@” contains notarized apps, which are not supported by this version of SideStore." = "软件源“%@”里包含公证应用,当前版本不支持。";
+"The source “%@” has been blocked by SideStore for security reasons." = "出于安全原因,软件源“%@”已被屏蔽。";
+"The source “%@” is not supported by this version of SideStore." = "当前版本不支持软件源“%@”。";
+"There are no SideStore sources." = "还没有添加任何软件源。";
+"These are permissions required by “%@” that SideStore does not recognize. Make sure you understand them before continuing." = "“%@”申请了一些无法识别的权限。请确认你了解它们的用途后再继续。";
+"These permissions must be declared by the source in order for SideStore to install this app:" = "软件源必须声明以下权限,才能安装这个应用:";
+"This reinstallation registers the new signature with the OS and will terminate SideStore. You can reopen SideStore immediately once reinstallation is completed." = "重新安装会把新签名注册到系统,过程中西瓜商店会被关闭。装完立刻就能重新打开。";
+"This will replace any previous backups. Please leave SideStore open until the backup is complete." = "这会覆盖之前的备份。备份完成前请保持西瓜商店在前台。";
+"To ensure you can continue using SideStore, \nthe app must be reinstalled now using the new certificate. Otherwise, you will be unable to refresh or open SideStore once the old certificate expires." = "为了能继续使用,现在需要用新证书重新安装一次。\n否则旧证书过期后,你将无法刷新或打开西瓜商店。";
+"Unable to Launch SideStore" = "无法启动西瓜商店";
+"You can reset the pairing file when you cannot sideload apps or enable JIT. You need to restart SideStore." = "当无法侧载应用或启用 JIT 时,可以重置配对文件。重置后需要重启西瓜商店。";
+"iOS 17.0-17.3.1 changed how JIT is enabled so SideStore cannot enable JIT without SideJITServer on these versions, sorry for any inconvenience." = "iOS 17.0–17.3.1 改变了启用 JIT 的方式,这些版本必须配合 SideJITServer 才能启用 JIT。";
+"“%@” could not be added to SideStore." = "“%@”添加失败。";

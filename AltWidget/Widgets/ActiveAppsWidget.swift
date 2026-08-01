@@ -52,8 +52,8 @@ struct ActiveAppsWidget: Widget
                 ActiveAppsWidgetView(entry: entry, widgetKind: widgetKind)
             }
             .supportedFamilies([.systemMedium])
-            .configurationDisplayName("Active Apps")
-            .description("View remaining days until your active apps expire. Tap the countdown timers to refresh them in the background.")
+            .configurationDisplayName("活跃应用")
+            .description("查看活跃应用的剩余天数。点击倒计时可在后台续签。")
             
             return widgetConfig
         }
