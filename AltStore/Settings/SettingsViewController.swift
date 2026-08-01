@@ -322,6 +322,13 @@ final class SettingsViewController: UITableViewController
         Keychain.shared.appleIDPassword = account.password
         Keychain.shared.adiPb = account.adiPB
         Keychain.shared.identifier = account.local_user
+        // Pin the server that issued this adi.pb. getAnisetteServerUrl() starts
+        // its search from menuAnisetteURL, so this makes the right server first
+        // in line while still falling through to another if it's down.
+        if let server = account.anisetteServer, !server.isEmpty {
+            UserDefaults.standard.menuAnisetteURL = server
+            AnisetteServersManager.shared.addServerIfMissing(server)
+        }
         signIn()
         update()
         do {
@@ -361,7 +368,11 @@ final class SettingsViewController: UITableViewController
             #endif
             return nil
         }
-        return ImportedAccount(email: email, password: password, cert: cert, certpass: certpass, local_user: identifier, adiPB: adiPB)
+        // Carry the server this adi.pb was provisioned against, so whoever
+        // imports it lands on the same one.
+        return ImportedAccount(email: email, password: password, cert: cert, certpass: certpass,
+                               local_user: identifier, adiPB: adiPB,
+                               anisetteServer: UserDefaults.standard.menuAnisetteURL)
     }
     
     func showExportAccount() {

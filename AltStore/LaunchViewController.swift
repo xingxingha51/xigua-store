@@ -192,6 +192,13 @@ final class LaunchViewController: UIViewController, UIDocumentPickerDelegate {
         Keychain.shared.appleIDPassword = account.password
         Keychain.shared.adiPb = account.adiPB
         Keychain.shared.identifier = account.local_user
+        // Pin the server that issued this adi.pb. getAnisetteServerUrl() starts
+        // its search from menuAnisetteURL, so this makes the right server first
+        // in line while still falling through to another if it's down.
+        if let server = account.anisetteServer, !server.isEmpty {
+            UserDefaults.standard.menuAnisetteURL = server
+            AnisetteServersManager.shared.addServerIfMissing(server)
+        }
         do {
             let altCert = try ALTCertificate(p12Data: account.cert, password: account.certpass)
             Keychain.shared.signingCertificate = altCert.encryptedP12Data(withPassword: "")!

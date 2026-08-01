@@ -113,6 +113,22 @@ public actor AnisetteServersManager {
         }
     }
 
+    /// Ensures `address` is present and not hidden, so a pinned server survives
+    /// saveLocalServers()'s "current URL isn't active, fall back to the first
+    /// one" check. Used when importing an account: adi.pb is only valid at the
+    /// server that issued it, which may not be in the public list at all.
+    public func addServerIfMissing(_ address: String) {
+        var items = loadLocalServers()
+        if let index = items.firstIndex(where: { $0.address == address }) {
+            guard items[index].isHidden else { return }
+            items[index].isHidden = false
+        } else {
+            let name = URL(string: address)?.host ?? address
+            items.insert(AnisetteServerItem(name: name, address: address), at: 0)
+        }
+        saveLocalServers(items)
+    }
+
     public func getActiveServerURLs() -> [String] {
         let servers = loadLocalServers()
         return servers.filter { !$0.isHidden }.map(\.address)
