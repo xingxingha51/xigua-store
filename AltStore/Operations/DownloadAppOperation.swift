@@ -114,7 +114,7 @@ final class DownloadAppOperation: ResultOperation<ALTApplication>, OperationLogg
 
             if let installedApp = storeApp.installedApp {
                 // guard !installedApp.matches(latestSupportedVersion) else { return self.finish(.failure(error)) }
-                guard installedApp.hasUpdate else {
+                guard installedApp.isUpdateAvailable else {
                     throw error
                 }
             }

@@ -618,6 +618,12 @@ extension AppManager
 //                    debugLog("\n\n\n\(context.insertedObjects)\n\n\n")
 //                    debugLog("\n\n\n\(context.updatedObjects)\n\n\n")
 //                    debugLog("\n\n\n\(context.deletedObjects)\n\n\n")
+
+                    // The updates list is fetched with a predicate on the stored
+                    // hasUpdate column, so it has to be recomputed here — this is
+                    // the only point where the available versions have just changed.
+                    InstalledApp.refreshUpdateFlags(in: context)
+
                     try context.save()
                     
                     DispatchQueue.main.async {

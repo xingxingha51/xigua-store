@@ -424,6 +424,26 @@ private extension DatabaseManager
                     storeApp.source = altStoreSource
                 }
                             
+                // Older builds recorded this app under upstream's bundle ID, which
+                // never matched the one our source declares — so the record had no
+                // storeApp and hasUpdate always returned false. Rename it rather
+                // than delete: it carries the install date and the expiry the
+                // My Apps screen shows.
+                //
+                // Guarded on resignedBundleIdentifier because this database lives
+                // in an app group we share with a real SideStore install; a row
+                // that genuinely belongs to SideStore must be left alone.
+                if StoreApp.altstoreAppID != Bundle.Info.appbundleIdentifier,
+                   let ourBundleID = Bundle.main.bundleIdentifier,
+                   let legacy = InstalledApp.first(satisfying: NSPredicate(format: "%K == %@ AND %K == %@",
+                                                                           #keyPath(InstalledApp.bundleIdentifier), Bundle.Info.appbundleIdentifier,
+                                                                           #keyPath(InstalledApp.resignedBundleIdentifier), ourBundleID),
+                                                   in: context)
+                {
+                    legacy.bundleIdentifier = StoreApp.altstoreAppID
+                    legacy.storeApp = storeApp
+                }
+
                 let serialNumber = Bundle.main.object(forInfoDictionaryKey: Bundle.Info.certificateID) as? String
                 let installedApp: InstalledApp
                 

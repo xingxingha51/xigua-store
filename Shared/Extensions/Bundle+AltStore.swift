@@ -17,9 +17,18 @@ public extension Bundle
         public static let certificateID = "ALTCertificateID"
         public static let appGroups = "ALTAppGroups"
         public static let altBundleID = "ALTBundleIdentifier"
-        public static let storeAppBundleIdentifier =  "com.SideStore.SideStore"
+        /// How this app identifies itself *inside a source catalogue* — it has to
+        /// equal the `bundleIdentifier` our apps.json declares, or the store can
+        /// never match its own installed record to the source entry and
+        /// self-update silently never fires (InstalledApp.hasUpdate bails on the
+        /// first guard because `storeApp` is nil).
+        ///
+        /// Deliberately *not* `appbundleIdentifier`: that one is the keychain
+        /// service name and the app-group suffix, and changing it would orphan
+        /// the stored Apple ID credentials and the database.
+        public static let storeAppBundleIdentifier = "com.xiguastore.XiguaStore"
         // public static var appbundleIdentifier = Bundle.main.bundleIdentifier
-        public static let appbundleIdentifier = "com.SideStore.SideStore"   // for now lets use what we had so far 
+        public static let appbundleIdentifier = "com.SideStore.SideStore"   // keychain service + app group; see storeAppBundleIdentifier
 
         public static let devicePairingString = "ALTPairingFile"
         public static let urlTypes = "CFBundleURLTypes"

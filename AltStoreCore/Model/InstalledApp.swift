@@ -67,6 +67,12 @@ public class InstalledApp: BaseEntity, InstalledAppProtocol
     @NSManaged public var storeBuildVersion: String?
     
     /* Transient */
+    /// Cached form of `isUpdateAvailable`. The updates list is driven by a
+    /// fetched-results controller, so the flag has to live in the store where a
+    /// predicate can reach it. It was declared in the model but never written,
+    /// which is why "暂无可用更新" showed even when an update existed.
+    @NSManaged public var hasUpdate: Bool
+
     @NSManaged public var isRefreshing: Bool
     
     /* Relationships */
@@ -80,7 +86,12 @@ public class InstalledApp: BaseEntity, InstalledAppProtocol
         return self.storeApp == nil
     }
     
-    @objc public var hasUpdate: Bool {
+    /// Whether the source currently offers a newer version.
+    ///
+    /// Computed, so it can't be used in a fetch predicate — Core Data would need
+    /// a real column. `hasUpdate` is that column, refreshed from this value by
+    /// `refreshUpdateFlags(in:)` after every source update.
+    public var isUpdateAvailable: Bool {
         // Basic validation
         guard isActive,
               let storeApp = self.storeApp,
@@ -255,6 +266,19 @@ public extension InstalledApp
         return NSFetchRequest<InstalledApp>(entityName: "InstalledApp")
     }
     
+    /// Recomputes the cached `hasUpdate` flags. Call after the sources change;
+    /// nothing else keeps the column in sync with `isUpdateAvailable`.
+    class func refreshUpdateFlags(in context: NSManagedObjectContext)
+    {
+        for app in InstalledApp.all(in: context)
+        {
+            let available = app.isUpdateAvailable
+            // Only touch changed rows — assigning unconditionally would dirty
+            // every object and make the FRC churn on each refresh.
+            if app.hasUpdate != available { app.hasUpdate = available }
+        }
+    }
+
     class func supportedUpdatesFetchRequest() -> NSFetchRequest<InstalledApp> 
     {
         let fetchRequest = InstalledApp.fetchRequest() as NSFetchRequest<InstalledApp>
