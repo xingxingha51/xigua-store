@@ -44,8 +44,64 @@ public struct KeychainItem<Value>
 public class Keychain
 {
     public static let shared = Keychain()
+
+
+    /// Copies anything an earlier build left in the *default* access group into
+    /// the pinned one, so switching installers doesn't look like a sign-out.
+    ///
+    /// Copy, not move: if the two groups happen to resolve to the same place the
+    /// write is a no-op, and leaving the originals behind costs a few hundred
+    /// bytes but can't lose credentials if this runs half-way.
+    private func migrateFromDefaultAccessGroupIfNeeded()
+    {
+        guard Keychain.pinnedAccessGroup != nil, !UserDefaults.standard.didMigrateKeychainAccessGroup else { return }
+
+        let fallback = KeychainAccess.Keychain(service: Bundle.Info.appbundleIdentifier)
+            .accessibility(.afterFirstUnlock)
+            .synchronizable(true)
+
+        for key in fallback.allKeys()
+        {
+            // Don't clobber anything already in the pinned group.
+            if (try? self.keychain.getData(key)) != nil { continue }
+            guard let data = try? fallback.getData(key) else { continue }
+            try? self.keychain.set(data, key: key)
+        }
+
+        UserDefaults.standard.didMigrateKeychainAccessGroup = true
+    }
     
-    public let keychain = KeychainAccess.Keychain(service: Bundle.Info.appbundleIdentifier).accessibility(.afterFirstUnlock).synchronizable(true)
+    /// Pinned to `<TeamID>.<bundleID>` instead of letting iOS pick a default.
+    ///
+    /// The default depends on the `keychain-access-groups` entitlement, and the
+    /// two installers disagree about it: isideload signs with the provisioning
+    /// profile's entitlements verbatim, which carry Apple's `<TeamID>.*`
+    /// wildcard, while AltSign strips the key when the app doesn't declare it.
+    /// Different defaults mean the credentials written by one installer are
+    /// invisible to the other — that is why the saved Apple ID "vanished" after
+    /// updating in-store.
+    ///
+    /// `application-identifier` is exactly `<TeamID>.<bundleID>`, which is a
+    /// concrete group both entitlement shapes grant: it *is* AltSign's default,
+    /// and it falls under isideload's wildcard.
+    public let keychain: KeychainAccess.Keychain = {
+        let base = KeychainAccess.Keychain(service: Bundle.Info.appbundleIdentifier)
+        guard let accessGroup = Keychain.pinnedAccessGroup else { return base.accessibility(.afterFirstUnlock).synchronizable(true) }
+        return KeychainAccess.Keychain(service: Bundle.Info.appbundleIdentifier, accessGroup: accessGroup)
+            .accessibility(.afterFirstUnlock)
+            .synchronizable(true)
+    }()
+
+    private static var pinnedAccessGroup: String? {
+        guard let app = ALTApplication(fileURL: Bundle.main.bundleURL),
+              let profile = app.provisioningProfile,
+              let applicationIdentifier = profile.entitlements[.applicationIdentifier] as? String,
+              // A wildcard App ID would make this a group we can't write to.
+              !applicationIdentifier.hasSuffix(".*")
+        else { return nil }
+
+        return applicationIdentifier
+    }
     
     @KeychainItem(key: "appleIDEmailAddress")
     public var appleIDEmailAddress: String?
@@ -89,6 +145,7 @@ public class Keychain
     
     private init()
     {
+        self.migrateFromDefaultAccessGroupIfNeeded()
         self.migrateLegacyKeychainItems()
     }
     

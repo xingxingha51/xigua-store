@@ -49,6 +49,20 @@ public extension UserDefaults
         get { self.string(forKey: #function) }
         set { self.set(newValue, forKey: #function) }
     }
+    /// One-shot: the database and cached bundles have been moved out of the app
+    /// group. Must live in `.standard` — see migrateDatabaseToAppGroupIfNeeded.
+    /// One-shot: keychain items copied from the default access group into the
+    /// pinned one. In `.standard` for the same reason as the other flag.
+    @objc var didMigrateKeychainAccessGroup: Bool {
+        get { self.bool(forKey: #function) }
+        set { self.set(newValue, forKey: #function) }
+    }
+
+    @objc var didMigrateOutOfAppGroup: Bool {
+        get { self.bool(forKey: #function) }
+        set { self.set(newValue, forKey: #function) }
+    }
+
     @objc var menuAnisetteURL: String {
         get { self.string(forKey: #function) ?? "" }
         set { self.set(newValue, forKey: #function) }

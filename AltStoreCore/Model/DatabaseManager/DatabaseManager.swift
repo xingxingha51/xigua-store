@@ -23,17 +23,18 @@ fileprivate class PersistentContainer: RSTPersistentContainer
 {
     override class func defaultDirectoryURL() -> URL
     {
-        guard let sharedDirectoryURL = FileManager.default.altstoreSharedDirectory else { return super.defaultDirectoryURL() }
-        
-        let databaseDirectoryURL = sharedDirectoryURL.appendingPathComponent("Database")
+        let databaseDirectoryURL = FileManager.default.altstoreDataDirectory.appendingPathComponent("Database")
         try? FileManager.default.createDirectory(at: databaseDirectoryURL, withIntermediateDirectories: true, attributes: nil)
 
         return databaseDirectoryURL
     }
     
+    /// Where the database used to live: inside the app group, whose identifier
+    /// changes with the signer. `migrateDatabaseIfNeeded` moves it out of there.
     class func legacyDirectoryURL() -> URL
     {
-        return super.defaultDirectoryURL()
+        guard let sharedDirectoryURL = FileManager.default.altstoreSharedDirectory else { return super.defaultDirectoryURL() }
+        return sharedDirectoryURL.appendingPathComponent("Database")
     }
 }
 
@@ -618,8 +619,24 @@ private extension DatabaseManager
     
     func migrateDatabaseToAppGroupIfNeeded(completion: @escaping (Result<Void, Error>) -> Void)
     {
-        // Only migrate if we haven't migrated yet and there's a valid AltStore app group.
-        guard UserDefaults.shared.requiresAppGroupMigration && Bundle.main.altstoreAppGroup != nil else { return completion(.success(())) }
+        // Moves the database and cached bundles out of the app group and into our
+        // own container. Runs at most once, and only when there is actually
+        // something in the old location.
+        //
+        // The flag lives in UserDefaults.standard, not .shared: `.shared` is
+        // backed by the app group suite, i.e. the very thing whose identity
+        // changes with the signer. Keeping the flag there would let the
+        // migration re-run — or never run — depending on who installed the app.
+        let previousDatabaseURL = PersistentContainer.legacyDirectoryURL().appendingPathComponent("AltStore.sqlite")
+        let previousAppsDirectoryURL = InstalledApp.legacyAppsDirectoryURL
+
+        let hasLegacyData = FileManager.default.fileExists(atPath: previousDatabaseURL.path)
+            || FileManager.default.fileExists(atPath: previousAppsDirectoryURL.path)
+
+        guard !UserDefaults.standard.didMigrateOutOfAppGroup, hasLegacyData else {
+            UserDefaults.standard.didMigrateOutOfAppGroup = true
+            return completion(.success(()))
+        }
 
         func finish(_ result: Result<Void, Error>)
         {
@@ -627,15 +644,12 @@ private extension DatabaseManager
             {
             case .failure(let error): completion(.failure(error))
             case .success:
-                UserDefaults.shared.requiresAppGroupMigration = false
+                UserDefaults.standard.didMigrateOutOfAppGroup = true
                 completion(.success(()))
             }
         }
         
-        let previousDatabaseURL = PersistentContainer.legacyDirectoryURL().appendingPathComponent("AltStore.sqlite")
         let databaseURL = PersistentContainer.defaultDirectoryURL().appendingPathComponent("AltStore.sqlite")
-        
-        let previousAppsDirectoryURL = InstalledApp.legacyAppsDirectoryURL
         let appsDirectoryURL = InstalledApp.appsDirectoryURL
         
         let databaseIntent = NSFileAccessIntent.writingIntent(with: databaseURL, options: [.forReplacing])

@@ -406,18 +406,17 @@ public extension InstalledApp
 public extension InstalledApp
 {
     class var appsDirectoryURL: URL {
-        let baseDirectory = FileManager.default.altstoreSharedDirectory ?? FileManager.default.applicationSupportDirectory
-        let appsDirectoryURL = baseDirectory.appendingPathComponent("Apps")
+        let appsDirectoryURL = FileManager.default.altstoreDataDirectory.appendingPathComponent("Apps")
         
         do { try FileManager.default.createDirectory(at: appsDirectoryURL, withIntermediateDirectories: true, attributes: nil) }
         catch { debugLog("Creating App Directory Error: \(error)") }
         return appsDirectoryURL
     }
     
+    /// The app-group copy, left behind by builds that stored apps there.
     class var legacyAppsDirectoryURL: URL {
-        let baseDirectory = FileManager.default.applicationSupportDirectory
-        let appsDirectoryURL = baseDirectory.appendingPathComponent("Apps")
-        return appsDirectoryURL
+        let baseDirectory = FileManager.default.altstoreSharedDirectory ?? FileManager.default.applicationSupportDirectory
+        return baseDirectory.appendingPathComponent("Apps")
     }
     
     class func fileURL(for app: AppProtocol) -> URL
