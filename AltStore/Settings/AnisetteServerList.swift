@@ -534,7 +534,7 @@ struct AnisetteServersView: View {
                         .alert(isPresented: $showingResetAlert) {
                             Alert(
                                 title: Text("Reset adi.pb"),
-                                message: Text("Are you sure you want to clear adi.pb from the Keychain? You will need to log back in to Apple ID in SideStore."),
+                                message: Text("确定要从钥匙串清除 adi.pb 吗?清除后需要重新登录 Apple ID。"),
                                 primaryButton: .destructive(Text("Reset")) {
                                     #if !DEBUG
                                     if Keychain.shared.adiPb != nil {

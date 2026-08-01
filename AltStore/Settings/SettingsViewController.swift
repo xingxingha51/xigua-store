@@ -1519,7 +1519,7 @@ extension SettingsViewController
                     selected: UserDefaults.standard.menuAnisetteURL,
                     onResetAdiPb: { [weak self] in
                         guard let self = self else { return }
-                        ToastView(text: "Cleared adi.pb!", detailText: "You will need to log back into Apple ID in SideStore.")
+                        ToastView(text: "已清除 adi.pb", detailText: "需要重新登录 Apple ID。")
                             .show(in: self)
                     }
                 )
@@ -1565,7 +1565,7 @@ extension SettingsViewController
                     } else {
                         let alert = UIAlertController(
                             title: "Local Network Access Required",
-                            message: "SideStore needs local network access to search for AltServer. Please enable it in Settings.",
+                            message: "西瓜商店需要本地网络权限才能搜索 AltServer,请在系统设置里开启。",
                             preferredStyle: .alert
                         )
                         alert.addAction(UIAlertAction(title: "Settings", style: .default) { _ in

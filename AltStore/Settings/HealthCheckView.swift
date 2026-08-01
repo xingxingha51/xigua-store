@@ -316,7 +316,7 @@ struct HealthCheckView: View {
                             Image(systemName: "checkmark.circle.fill")
                                 .font(.system(size: 44))
                                 .foregroundColor(.green)
-                            Text("SideStore Ready")
+                            Text("西瓜商店已就绪")
                                 .font(.title2)
                                 .fontWeight(.bold)
                             Text(viewModel.connectionMode == .localVPN

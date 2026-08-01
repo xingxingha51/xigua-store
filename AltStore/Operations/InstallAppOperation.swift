@@ -278,14 +278,14 @@ final class InstallAppOperation: ResultOperation<InstalledApp>, OperationLogging
 
                     let content = UNMutableNotificationContent()
                     content.title = "Refreshing..."
-                    content.body = "SideStore will automatically move to the homescreen to finish refreshing!"
+                    content.body = "西瓜商店会自动回到主屏幕完成续签。"
                     let notification = UNNotificationRequest(identifier: Bundle.Info.appbundleIdentifier + ".FinishRefreshNotification", content: content, trigger: UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false))
                     UNUserNotificationCenter.current().add(notification)
                     break
                 default:
                     self.verboseLog("Notifications are not enabled")
 
-                    let alert = UIAlertController(title: "Finish Refresh", message: "Please reopen SideStore after the process is finished.To finish refreshing, SideStore must be moved to the background. To do this, you can either go to the Home Screen manually or by hitting Continue. Please reopen SideStore after doing this.", preferredStyle: .alert)
+                    let alert = UIAlertController(title: "完成续签", message: "续签需要西瓜商店退到后台。你可以手动回主屏幕,或点击「继续」。完成后请重新打开西瓜商店。", preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: NSLocalizedString("Continue", comment: ""), style: .default, handler: { _ in
                         self.debugLog("Going home")
                         // Cell Shortcut

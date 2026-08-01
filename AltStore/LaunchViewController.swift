@@ -26,7 +26,13 @@ final class LaunchViewController: UIViewController, UIDocumentPickerDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        splashView = SplashView(frame: view.bounds, appName: "SideStore")
+        // Read the name instead of hardcoding it — this label sits under the app
+        // icon on the splash screen, so a stale literal here shows users a
+        // different name than the one on their home screen.
+        let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String
+            ?? Bundle.main.object(forInfoDictionaryKey: kCFBundleNameKey as String) as? String
+            ?? ""
+        splashView = SplashView(frame: view.bounds, appName: appName)
         destinationViewController = storyboard!.instantiateViewController(withIdentifier: "tabBarController") as? TabBarController
         view.addSubview(splashView)
     }
@@ -165,7 +171,7 @@ final class LaunchViewController: UIViewController, UIDocumentPickerDelegate {
     @MainActor
     func displayError(_ msg: String) {
         debugLog("[SideStore] \(msg)")
-        let alert = UIAlertController(title: "Error launching SideStore", message: msg, preferredStyle: .alert)
+        let alert = UIAlertController(title: "无法启动西瓜商店", message: msg, preferredStyle: .alert)
         self.present(alert, animated: true)
     }
     
@@ -190,7 +196,7 @@ final class LaunchViewController: UIViewController, UIDocumentPickerDelegate {
             let altCert = try ALTCertificate(p12Data: account.cert, password: account.certpass)
             Keychain.shared.signingCertificate = altCert.encryptedP12Data(withPassword: "")!
             Keychain.shared.signingCertificatePassword = account.certpass
-            let toastView = ToastView(text: NSLocalizedString("Successfully imported '\(account.email)'!", comment: ""), detailText: "SideStore should be fully operational!")
+            let toastView = ToastView(text: NSLocalizedString("Successfully imported '\(account.email)'!", comment: ""), detailText: "西瓜商店现在可以正常使用了。")
             return toastView.show(in: self)
         } catch {
             let toastView = ToastView(text: NSLocalizedString("Failed to import account certificate!", comment: ""), detailText: "Error: \(error.localizedDescription). Still imported account/adi.pb details!")

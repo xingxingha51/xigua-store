@@ -195,21 +195,34 @@ public extension DatabaseManager
                 CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(), .willMigrateDatabase, nil, nil, true)
             }
 
+            func prepare()
+            {
+                self.prepareDatabase() { (result) in
+                    switch result
+                    {
+                    case .failure(let error): finish(error)
+                    case .success: finish(nil)
+                    }
+                }
+            }
+
             self.migrateDatabaseToAppGroupIfNeeded { (result) in
                 switch result
                 {
                 case .failure(let error): finish(error)
                 case .success:
+                    // A start that fails *after* the store loads leaves isStarted
+                    // false, so LaunchViewController's Retry calls start() again —
+                    // and loading the same store twice throws NSCocoaErrorDomain
+                    // 134081 ("Can't add the same store twice"). That masks whatever
+                    // actually failed the first time, and since isStarted never
+                    // flips, every subsequent retry reports the bogus error too.
+                    // Resume from prepareDatabase instead when the store is already up.
+                    guard self.persistentContainer.persistentStoreCoordinator.persistentStores.isEmpty else { return prepare() }
+
                     self.persistentContainer.loadPersistentStores { (description, error) in
                         guard error == nil else { return finish(error!) }
-                        
-                        self.prepareDatabase() { (result) in
-                            switch result
-                            {
-                            case .failure(let error): finish(error)
-                            case .success: finish(nil)
-                            }
-                        }
+                        prepare()
                     }
                 }
             }
@@ -359,7 +372,12 @@ private extension DatabaseManager
         context.performAndWait {
             do
             {
-                guard let localApp = ALTApplication(fileURL: Bundle.main.bundleURL) else { return }
+                // Bare `return` here would leave completionHandler uncalled, so
+                // start() never finishes and the launch screen hangs with no error.
+                guard let localApp = ALTApplication(fileURL: Bundle.main.bundleURL) else {
+                    completionHandler(.failure(ALTError(.invalidApp)))
+                    return
+                }
                 
                 #if !targetEnvironment(simulator)
                 guard localApp.provisioningProfile != nil else {

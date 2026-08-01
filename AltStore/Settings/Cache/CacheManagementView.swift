@@ -20,7 +20,7 @@ struct CacheManagementView: View {
                     .scaleEffect(1.1)
             } else {
                 List {
-                    Section(header: Text("Internal App Cache"), footer: Text("Cached unzipped app bundles stored in SideStore's private container. These are used during automatic background refreshes and resigns.")) {
+                    Section(header: Text("Internal App Cache"), footer: Text("解压后的应用包缓存,存放在西瓜商店的私有目录里,用于后台自动续签和重新签名。")) {
                         if viewModel.internalApps.isEmpty {
                             Text("No cached internal apps.")
                                 .foregroundColor(.secondary)
@@ -92,7 +92,7 @@ struct CacheManagementView: View {
             let appName = viewModel.itemToDelete?.name ?? "this app"
             return Alert(
                 title: Text("Delete Cached App?"),
-                message: Text("If deleted, SideStore will require the original IPA file during reinstall, backup, resign, or refresh procedures. Are you sure you want to delete the cached app bundle for “\(appName)” ?"),
+                message: Text("删除后,重装、备份、重签或续签“\(appName)”时需要重新提供原始 IPA 文件。确定要删除吗?"),
                 primaryButton: .destructive(Text("Delete")) {
                     if let item = viewModel.itemToDelete {
                         viewModel.deleteItem(item)
