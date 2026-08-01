@@ -400,17 +400,17 @@ private extension DatabaseManager
                 // Make sure to always update source URL to be current.
                 try! altStoreSource.setSourceURL(Source.altStoreSourceURL)
 
-                // altStoreSource above is now ours (it has to be — it's the
-                // self-update feed). Seed upstream's alongside it so users still
-                // reach the wider community catalogue. Only created when absent,
-                // so removing it doesn't get undone on the next launch.
-                if Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), Source.sideStoreIdentifier), in: context) == nil
-                {
-                    _ = Source.make(name: Source.sideStoreSourceName,
-                                    groupID: Source.altStoreGroupIdentifier,
-                                    sourceURL: Source.sideStoreSourceURL,
-                                    context: context)
-                }
+                // We used to seed upstream's catalogue here. Dropped: it is all
+                // English, most of it downloads from GitHub (which the users this
+                // fork targets can't reach), and it lists SideStore and
+                // LiveContainer a second time — so the same app appeared twice
+                // and could be installed from the wrong entry.
+                //
+                // Only the seeding is removed. Anyone who already has the source
+                // can delete it in Settings and it stays gone, because nothing
+                // re-creates it — and a user who adds it back on purpose keeps
+                // it. Deleting sources on the user's behalf isn't worth the
+                // chance of removing one they wanted.
 
                 let storeApp: StoreApp
                 
