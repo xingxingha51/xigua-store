@@ -72,18 +72,23 @@ final class TabBarController: UITabBarController
         let sourcesNavigationController = self.allViewControllers[Tab.sources.rawValue] as! UINavigationController
         self.sourcesViewController = sourcesNavigationController.viewControllers.first as? SourcesViewController
 
-        // Show only the tabs in Tab.visible. The hidden ones stay in
-        // allViewControllers so deep links can still reach them.
-        self.viewControllers = Tab.visible.map { self.allViewControllers[$0.rawValue] }
-
-        // Set titles here rather than via Main.strings: the Settings tab is a
+        // Titles go on *before* the items reach the bar. Set afterwards, the
+        // icons stay vertically centred as if the items had no label: UITabBar
+        // lays each item out once, and a later title change doesn't invalidate
+        // that — which is why everything only snapped into place after the
+        // first tap forced a re-layout.
+        //
+        // Set here rather than via Main.strings: the Settings tab is a
         // storyboard placeholder, so its title comes from the referenced
         // storyboard and a Main.strings override silently has no effect.
         for tab in Tab.visible
         {
-            guard let index = Tab.visible.firstIndex(of: tab) else { continue }
-            self.viewControllers?[index].tabBarItem.title = tab.localizedTitle
+            self.allViewControllers[tab.rawValue].tabBarItem.title = tab.localizedTitle
         }
+
+        // Show only the tabs in Tab.visible. The hidden ones stay in
+        // allViewControllers so deep links can still reach them.
+        self.viewControllers = Tab.visible.map { self.allViewControllers[$0.rawValue] }
     }
 
     /// Position of a tab on the *visible* bar, or nil when it's hidden.

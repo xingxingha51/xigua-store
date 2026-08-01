@@ -248,8 +248,12 @@ final class SettingsViewController: UITableViewController
         // --- iOS 26 fix ---
         if #available(iOS 26.0, *) {
             let appearance = UINavigationBarAppearance()
-            appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-            appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+            // .label, not .white: the page used to sit on a purple background
+            // so white was always readable. On the system background it is
+            // invisible in light mode. (The same method at line ~451 already
+            // uses .label — this branch was just missed.)
+            appearance.titleTextAttributes = [.foregroundColor: UIColor.label]
+            appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.label]
             navigationController?.navigationBar.standardAppearance = appearance
             navigationController?.navigationBar.scrollEdgeAppearance = appearance       // required for iOS 26, maybe enforce it in storyboard?
         } 
