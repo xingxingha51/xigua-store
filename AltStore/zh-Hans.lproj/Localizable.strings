@@ -601,3 +601,6 @@
 "Successfully imported '%@'!" = "已导入账号 %@";
 "Would you like to remove this app's extensions so they don't count towards your limit? There are %d Extensions" = "要移除这个应用的扩展吗?移除后它们就不占名额了。共有 %d 个扩展。";
 "Would you like to revoke your previous certificates?\n%@" = "要吊销你之前的证书吗?\n%@";
+"需要重新登录" = "需要重新登录";
+"Apple 拒绝了已保存的账号密码。若使用的是导入的账号,请确认 Anisette 服务器与导出时一致。" = "Apple 拒绝了已保存的账号密码。若使用的是导入的账号,请确认 Anisette 服务器与导出时一致。";
+"钥匙串里没有已保存的 Apple ID 或密码,需要登录一次。" = "钥匙串里没有已保存的 Apple ID 或密码,需要登录一次。";

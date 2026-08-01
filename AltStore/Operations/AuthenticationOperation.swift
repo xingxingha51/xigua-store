@@ -373,15 +373,29 @@ final class AuthenticationOperation: ResultOperation<(ALTTeam, ALTCertificate?, 
                 self.appleIDPassword = password
                 return (account, session)
             } catch ALTAppleAPIError.incorrectCredentials, ALTAppleAPIError.appSpecificPasswordRequired {
+                // Falling back to the login screen here looks identical to having
+                // no credentials at all, which makes an imported account that
+                // Apple rejected impossible to tell apart from one that never
+                // arrived. Say which it is.
+                await self.reportSignInFallback(NSLocalizedString("Apple 拒绝了已保存的账号密码。若使用的是导入的账号,请确认 Anisette 服务器与导出时一致。", comment: ""))
                 return try await self.presentSignInUI()
             } catch {
                 throw error
             }
         } else {
+            await self.reportSignInFallback(NSLocalizedString("钥匙串里没有已保存的 Apple ID 或密码,需要登录一次。", comment: ""))
             return try await self.presentSignInUI()
         }
     }
     
+    @MainActor
+    private func reportSignInFallback(_ reason: String) {
+        self.debugLog("[Authentication] Presenting sign-in UI: \(reason)")
+        guard let presentingViewController = self.context.presentingViewController else { return }
+        ToastView(text: NSLocalizedString("需要重新登录", comment: ""), detailText: reason)
+            .show(in: presentingViewController)
+    }
+
     @MainActor
     private func presentSignInUI() async throws -> (ALTAccount, ALTAppleAPISession) {
         try await withCheckedThrowingContinuation { continuation in

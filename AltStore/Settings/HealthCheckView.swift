@@ -9,6 +9,7 @@
 import SwiftUI
 import Minimuxer
 import Darwin
+import AltStoreCore
 
 struct LocalInterfaceInfo: Hashable, Identifiable {
     var id: String { name + "-" + ip }
@@ -346,6 +347,33 @@ struct HealthCheckView: View {
                 .padding(.vertical, 8)
             }
             
+            // Sign-in state. Refresh re-authenticates with Apple, and when the
+            // credentials aren't usable the app just presents the login screen —
+            // with no way to tell "nothing stored" from "Apple rejected it".
+            // Importing an account writes the keychain but not a session, so
+            // that path always does a full sign-in and this is where it shows.
+            Section(header: Text("账号状态"),
+                    footer: Text("导入账号只会写入邮箱、密码、adi.pb 和证书;会话缓存要等一次成功登录后才有。adi.pb 只在签发它的那台 Anisette 服务器上有效。")) {
+                DependencyRow(title: "Apple ID",
+                              subtitle: Keychain.shared.appleIDEmailAddress ?? "未存储",
+                              isSatisfied: Keychain.shared.appleIDEmailAddress != nil)
+                DependencyRow(title: "密码",
+                              subtitle: Keychain.shared.appleIDPassword != nil ? "已存储" : "未存储",
+                              isSatisfied: Keychain.shared.appleIDPassword != nil)
+                DependencyRow(title: "adi.pb",
+                              subtitle: Keychain.shared.adiPb != nil ? "已存储" : "未存储(登录时会重新 provision)",
+                              isSatisfied: Keychain.shared.adiPb != nil)
+                DependencyRow(title: "签名证书",
+                              subtitle: Keychain.shared.signingCertificate != nil ? "已存储" : "未存储",
+                              isSatisfied: Keychain.shared.signingCertificate != nil)
+                DependencyRow(title: "会话缓存",
+                              subtitle: Keychain.shared.session != nil ? "有(可跳过登录)" : "无(每次都要完整登录)",
+                              isSatisfied: Keychain.shared.session != nil)
+                DependencyRow(title: "Anisette 服务器",
+                              subtitle: UserDefaults.standard.menuAnisetteURL,
+                              isSatisfied: !UserDefaults.standard.menuAnisetteURL.isEmpty)
+            }
+
             // Section 2: Core Dependencies
             Section(header: Text("Core Requirements")) {
                 DependencyRow(
