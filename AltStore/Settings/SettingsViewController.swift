@@ -328,7 +328,8 @@ final class SettingsViewController: UITableViewController
             let altCert = try ALTCertificate(p12Data: account.cert, password: account.certpass)
             Keychain.shared.signingCertificate = altCert.encryptedP12Data(withPassword: "")!
             Keychain.shared.signingCertificatePassword = account.certpass
-            let toastView = ToastView(text: NSLocalizedString("Successfully imported '\(account.email)'!", comment: ""), detailText: "SideStore should be fully operational!")
+            let format = NSLocalizedString("Successfully imported '%@'!", comment: "")
+            let toastView = ToastView(text: String(format: format, account.email), detailText: "西瓜商店现在可以正常使用了。")
             return toastView.show(in: self)
         } catch {
             let toastView = ToastView(text: NSLocalizedString("Failed to import account certificate!", comment: ""), detailText: "Error: \(error.localizedDescription). Still imported account/adi.pb details!")

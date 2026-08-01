@@ -598,3 +598,6 @@
 "this device's OS version" = "这台设备的系统版本";
 "your device" = "你的设备";
 "“%@” Blocked" = "「%@」已被屏蔽";
+"Successfully imported '%@'!" = "已导入账号 %@";
+"Would you like to remove this app's extensions so they don't count towards your limit? There are %d Extensions" = "要移除这个应用的扩展吗?移除后它们就不占名额了。共有 %d 个扩展。";
+"Would you like to revoke your previous certificates?\n%@" = "要吊销你之前的证书吗?\n%@";
