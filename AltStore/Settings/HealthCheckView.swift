@@ -366,9 +366,13 @@ struct HealthCheckView: View {
                 DependencyRow(title: "签名证书",
                               subtitle: Keychain.shared.signingCertificate != nil ? "已存储" : "未存储",
                               isSatisfied: Keychain.shared.signingCertificate != nil)
+                // Informational, never a failure: certificate/session/team are
+                // plain in-memory properties, not @KeychainItem, so they are
+                // always empty right after launch. A red ✗ here reads as a
+                // problem when it is just how the cache works.
                 DependencyRow(title: "会话缓存",
-                              subtitle: Keychain.shared.session != nil ? "有(可跳过登录)" : "无(每次都要完整登录)",
-                              isSatisfied: Keychain.shared.session != nil)
+                              subtitle: Keychain.shared.session != nil ? "本次已登录,可跳过认证" : "本次尚未登录(冷启动后正常)",
+                              isSatisfied: Keychain.shared.session != nil ? true : nil)
                 DependencyRow(title: "Anisette 服务器",
                               subtitle: "\(UserDefaults.standard.menuAnisetteURL)",
                               isSatisfied: !UserDefaults.standard.menuAnisetteURL.isEmpty)

@@ -740,3 +740,5 @@
 "Usbmuxd fake server is not listening" = "usbmuxd 模拟服务没有在监听。";
 "Remote endpoint IP is not configured or reachable." = "远程端点 IP 未配置或不可达。";
 "VPN tunnel iface is up but tunnel peer IP is not yet reachable — VPN may not be routing device traffic correctly." = "VPN 隧道接口已启动,但对端 IP 还不可达 —— VPN 可能没有正确路由设备流量。";
+"本次已登录,可跳过认证" = "本次已登录,可跳过认证";
+"本次尚未登录(冷启动后正常)" = "本次尚未登录(冷启动后正常)";
