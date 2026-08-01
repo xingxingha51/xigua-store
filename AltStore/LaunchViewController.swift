@@ -200,11 +200,16 @@ final class LaunchViewController: UIViewController, UIDocumentPickerDelegate {
     
     func detectAndImportAccountFile() {
         let accountFileURL = FileManager.default.documentsDirectory.appendingPathComponent("Account.sideconf")
-        #if !DEBUG
+
+        // Always delete after importing. This file holds the Apple ID password
+        // in cleartext, and Documents is exposed over AFC and swept into
+        // backups — leaving it there turns a one-off handoff into a permanent
+        // credential sitting on disk.
+        //
+        // Upstream gates the removal on `#if !DEBUG`, which does not hold here:
+        // this project defines DEBUG even in Release, so that branch would keep
+        // the file in shipping builds.
         importAccountAtFile(accountFileURL, remove: true)
-        #else
-        importAccountAtFile(accountFileURL)
-        #endif
     }
 }
 
