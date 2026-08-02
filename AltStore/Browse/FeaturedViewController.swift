@@ -24,8 +24,9 @@ extension FeaturedViewController
     private struct Section: RawRepresentable, Equatable
     {
         static let recentlyUpdated = Section(rawValue: 0)
-        static let categories = Section(rawValue: 1)
-        static let featuredHeader = Section(rawValue: 2)
+        // Categories were dropped: with a handful of apps in one source the
+        // tiles were a whole screen of navigation to two near-empty lists.
+        static let featuredHeader = Section(rawValue: 1)
         
         let rawValue: Int
         
@@ -58,7 +59,6 @@ class FeaturedViewController: UICollectionViewController
 {
     private lazy var dataSource = self.makeDataSource()
     private lazy var recentlyUpdatedDataSource = self.makeRecentlyUpdatedDataSource()
-    private lazy var categoriesDataSource = self.makeCategoriesDataSource()
     private lazy var featuredAppsDataSource = self.makeFeaturedAppsDataSource()
     
     private var searchController: RSTSearchController!
@@ -140,28 +140,10 @@ private extension FeaturedViewController
                 let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(AppBannerView.standardHeight))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
-                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(AppBannerView.standardHeight * 2 + spacing))
-                let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item, item]) // 2 items per group
-                group.interItemSpacing = .fixed(spacing)
-                
-                let layoutSection = NSCollectionLayoutSection(group: group)
-                layoutSection.interGroupSpacing = spacing
-                layoutSection.orthogonalScrollingBehavior = .groupPagingCentered
-                layoutSection.contentInsets.bottom = interSectionSpacing
-                layoutSection.boundarySupplementaryItems = [
-                    NSCollectionLayoutBoundarySupplementaryItem(layoutSize: titleSize, elementKind: ElementKind.sectionHeader.rawValue, alignment: .topLeading)
-                ]
-                return layoutSection
-                
-            case .categories:
-                let itemWidth = (layoutEnvironment.container.effectiveContentSize.width - spacing) / 2
-                let itemHeight = 90.0
-                let itemSize = NSCollectionLayoutSize(widthDimension: .absolute(itemWidth), heightDimension: .absolute(itemHeight))
-                let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                
-                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(itemHeight))
-                let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item, item]) // 2 items per group
-                group.interItemSpacing = .fixed(spacing)
+                // One per row, scrolling with the page — a horizontal pager hid
+                // most of the list behind a swipe nobody discovers.
+                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(AppBannerView.standardHeight))
+                let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
                 
                 let layoutSection = NSCollectionLayoutSection(group: group)
                 layoutSection.interGroupSpacing = spacing
@@ -203,7 +185,7 @@ private extension FeaturedViewController
                 
                 let layoutSection = NSCollectionLayoutSection(group: group)
                 layoutSection.interGroupSpacing = spacing
-                layoutSection.orthogonalScrollingBehavior = .groupPagingCentered
+                layoutSection.orthogonalScrollingBehavior = .none
                 layoutSection.contentInsets.top = 8
                 layoutSection.contentInsets.bottom = interSectionSpacing
                 layoutSection.boundarySupplementaryItems = [titleHeader, buttonHeader]
@@ -222,7 +204,7 @@ private extension FeaturedViewController
         featuredHeaderDataSource.numberOfSectionsHandler = { 1 }
         featuredHeaderDataSource.numberOfItemsHandler = { _ in 0 }
         
-        let dataSource = RSTCompositeCollectionViewPrefetchingDataSource<StoreApp, UIImage>(dataSources: [self.recentlyUpdatedDataSource, self.categoriesDataSource, featuredHeaderDataSource, self.featuredAppsDataSource])
+        let dataSource = RSTCompositeCollectionViewPrefetchingDataSource<StoreApp, UIImage>(dataSources: [self.recentlyUpdatedDataSource, featuredHeaderDataSource, self.featuredAppsDataSource])
         dataSource.predicate = StoreApp.visibleAppsPredicate // Ensure we never accidentally show hidden apps
         return dataSource
     }
@@ -231,8 +213,11 @@ private extension FeaturedViewController
     {
         let fetchRequest = StoreApp.fetchRequest() as NSFetchRequest<StoreApp>
         fetchRequest.returnsObjectsAsFaults = false
+        // Source order, not release date. This is now the page's only list, so
+        // whoever maintains apps.json decides what a new user sees first —
+        // LiveContainer, because everything else can then share its one slot.
         fetchRequest.sortDescriptors = [
-            NSSortDescriptor(keyPath: \StoreApp.latestSupportedVersion?.date, ascending: false),
+            NSSortDescriptor(keyPath: \StoreApp.sortIndex, ascending: true),
             NSSortDescriptor(keyPath: \StoreApp.name, ascending: true),
             NSSortDescriptor(keyPath: \StoreApp.bundleIdentifier, ascending: true),
             NSSortDescriptor(keyPath: \StoreApp.sourceIdentifier, ascending: true),
@@ -290,49 +275,6 @@ private extension FeaturedViewController
         return dataSource
     }
     
-    func makeCategoriesDataSource() -> RSTCompositeCollectionViewDataSource<StoreApp>
-    {
-        let knownCategories = StoreCategory.allCases.filter { $0 != .other }.map { $0.rawValue }
-        
-        let knownFetchRequest = StoreApp.fetchRequest()
-        knownFetchRequest.predicate = NSPredicate(format: "%K IN %@", #keyPath(StoreApp._category), knownCategories)
-        knownFetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \StoreApp._category, ascending: true),
-                                             NSSortDescriptor(keyPath: \StoreApp.bundleIdentifier, ascending: true),
-                                             NSSortDescriptor(keyPath: \StoreApp.sourceIdentifier, ascending: true)]
-        
-        let unknownFetchRequest = StoreApp.fetchRequest()
-        unknownFetchRequest.predicate = StoreApp.otherCategoryPredicate
-        unknownFetchRequest.sortDescriptors = [NSSortDescriptor(keyPath: \StoreApp._category, ascending: true),
-                                               NSSortDescriptor(keyPath: \StoreApp.bundleIdentifier, ascending: true),
-                                               NSSortDescriptor(keyPath: \StoreApp.sourceIdentifier, ascending: true)]
-        
-        let knownController = NSFetchedResultsController(fetchRequest: knownFetchRequest, managedObjectContext: DatabaseManager.shared.viewContext, sectionNameKeyPath: #keyPath(StoreApp._category), cacheName: nil)
-        let knownDataSource = RSTFetchedResultsCollectionViewDataSource<StoreApp>(fetchedResultsController: knownController)
-        knownDataSource.liveFetchLimit = 1 // One app per category
-        
-        let unknownController = NSFetchedResultsController(fetchRequest: unknownFetchRequest, managedObjectContext: DatabaseManager.shared.viewContext, sectionNameKeyPath: nil, cacheName: nil)
-        let unknownDataSource = RSTFetchedResultsCollectionViewDataSource<StoreApp>(fetchedResultsController: unknownController)
-        unknownDataSource.liveFetchLimit = 1
-        
-        // Use composite data source to ensure "Other" category is always last.
-        let dataSource = RSTCompositeCollectionViewDataSource<StoreApp>(dataSources: [knownDataSource, unknownDataSource])
-        dataSource.shouldFlattenSections = true // Combine into single section, with one StoreApp per category.
-        dataSource.cellIdentifierHandler = { _ in ReuseID.category.rawValue }
-        dataSource.cellConfigurationHandler = { cell, storeApp, indexPath in
-            let category = storeApp.category ?? .other
-            
-            let cell = cell as! LargeIconCollectionViewCell
-            cell.textLabel.text = category.localizedName
-            cell.imageView.image = UIImage(systemName: category.symbolName)
-            
-            var background = UIBackgroundConfiguration.clear()
-            background.backgroundColor = category.tintColor
-            background.cornerRadius = 16
-            cell.backgroundConfiguration = background
-        }
-        
-        return dataSource
-    }
     
     func makeFeaturedAppsDataSource() -> RSTCompositeCollectionViewPrefetchingDataSource<StoreApp, UIImage>
     {
@@ -622,7 +564,6 @@ extension FeaturedViewController
             switch section
             {
             case .recentlyUpdated: content.text = NSLocalizedString("New & Updated", comment: "")
-            case .categories: content.text = NSLocalizedString("Categories", comment: "")
             case .featuredHeader: content.text = NSLocalizedString("Featured", comment: "")
             default: break
             }
@@ -672,10 +613,6 @@ extension FeaturedViewController
         case .recentlyUpdated:
             let appViewController = AppViewController.makeAppViewController(app: storeApp)
             self.navigationController?.pushViewController(appViewController, animated: true)
-            
-        case .categories:
-            let category = storeApp.category ?? .other
-            self.performSegue(withIdentifier: "showBrowseViewController", sender: category)
             
         default: break
         }
