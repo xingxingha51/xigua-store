@@ -23,16 +23,12 @@ extension FeaturedViewController
     // Open-ended because each Source is its own section
     private struct Section: RawRepresentable, Equatable
     {
-        static let recentlyUpdated = Section(rawValue: 0)
-        // Categories were dropped: with a handful of apps in one source the
-        // tiles were a whole screen of navigation to two near-empty lists.
-        static let featuredHeader = Section(rawValue: 1)
+        // The page is one list now. Categories were a screen of navigation to
+        // near-empty results, and the per-source "Featured" carousels below
+        // repeated the very same apps as oversized cards.
+        static let allApps = Section(rawValue: 0)
         
         let rawValue: Int
-        
-        var isFeaturedAppsSection: Bool {
-            return self.rawValue > Section.featuredHeader.rawValue
-        }
         
         init(rawValue: Int)
         {
@@ -124,7 +120,7 @@ private extension FeaturedViewController
     class func makeLayout() -> UICollectionViewCompositionalLayout
     {
         let config = UICollectionViewCompositionalLayoutConfiguration()
-        config.interSectionSpacing = 0 // Must be 0 for Section.featuredHeader
+        config.interSectionSpacing = 0
         config.contentInsetsReference = .layoutMargins
         
         let layout = UICollectionViewCompositionalLayout(sectionProvider: { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
@@ -136,7 +132,7 @@ private extension FeaturedViewController
             
             switch section
             {
-            case .recentlyUpdated:
+            case .allApps:
                 let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(AppBannerView.standardHeight))
                 let item = NSCollectionLayoutItem(layoutSize: itemSize)
                 
@@ -154,43 +150,6 @@ private extension FeaturedViewController
                 ]
                 return layoutSection
                 
-            case .featuredHeader:
-                // We don't want to show any items, so set height to 1.0
-                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(1.0))
-                let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                
-                let group = NSCollectionLayoutGroup.vertical(layoutSize: itemSize, subitems: [item])
-                
-                let layoutSection = NSCollectionLayoutSection(group: group)
-                layoutSection.contentInsets.top = 0
-                layoutSection.contentInsets.bottom = 0
-                layoutSection.boundarySupplementaryItems = [
-                    NSCollectionLayoutBoundarySupplementaryItem(layoutSize: titleSize, elementKind: ElementKind.sectionHeader.rawValue, alignment: .topLeading)
-                ]
-                return layoutSection
-                
-            case _ where section.isFeaturedAppsSection:
-                let itemHeight: NSCollectionLayoutDimension = if #available(iOS 17, *) { .uniformAcrossSiblings(estimate: 350) } else { .estimated(350) }
-                let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: itemHeight)
-                let item = NSCollectionLayoutItem(layoutSize: itemSize)
-                
-                let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: itemHeight)
-                let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-                group.interItemSpacing = .fixed(spacing)
-                
-                let titleHeader = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: titleSize, elementKind: ElementKind.sourceHeader.rawValue, alignment: .topLeading)
-                
-                let buttonSize = NSCollectionLayoutSize(widthDimension: .estimated(44), heightDimension: .estimated(20))
-                let buttonHeader = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: buttonSize, elementKind: ElementKind.button.rawValue, alignment: .topTrailing)
-                
-                let layoutSection = NSCollectionLayoutSection(group: group)
-                layoutSection.interGroupSpacing = spacing
-                layoutSection.orthogonalScrollingBehavior = .none
-                layoutSection.contentInsets.top = 8
-                layoutSection.contentInsets.bottom = interSectionSpacing
-                layoutSection.boundarySupplementaryItems = [titleHeader, buttonHeader]
-                return layoutSection
-                
             default: return nil
             }
         }, configuration: config)
@@ -200,11 +159,7 @@ private extension FeaturedViewController
     
     func makeDataSource() -> RSTCompositeCollectionViewPrefetchingDataSource<StoreApp, UIImage>
     {
-        let featuredHeaderDataSource = RSTDynamicCollectionViewDataSource<StoreApp>()
-        featuredHeaderDataSource.numberOfSectionsHandler = { 1 }
-        featuredHeaderDataSource.numberOfItemsHandler = { _ in 0 }
-        
-        let dataSource = RSTCompositeCollectionViewPrefetchingDataSource<StoreApp, UIImage>(dataSources: [self.recentlyUpdatedDataSource, featuredHeaderDataSource, self.featuredAppsDataSource])
+        let dataSource = RSTCompositeCollectionViewPrefetchingDataSource<StoreApp, UIImage>(dataSources: [self.recentlyUpdatedDataSource])
         dataSource.predicate = StoreApp.visibleAppsPredicate // Ensure we never accidentally show hidden apps
         return dataSource
     }
@@ -563,8 +518,7 @@ extension FeaturedViewController
             
             switch section
             {
-            case .recentlyUpdated: content.text = NSLocalizedString("New & Updated", comment: "")
-            case .featuredHeader: content.text = NSLocalizedString("Featured", comment: "")
+            case .allApps: content.text = NSLocalizedString("New & Updated", comment: "")
             default: break
             }
             
@@ -573,30 +527,6 @@ extension FeaturedViewController
             
             headerView.contentConfiguration = content
             return headerView
-            
-        case ElementKind.button.rawValue where section.isFeaturedAppsSection:
-            let buttonView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: kind, for: indexPath) as! ButtonCollectionReusableView
-            
-            let indexPath = IndexPath(item: 0, section: indexPath.section)
-            let storeApp = self.dataSource.item(at: indexPath)
-            
-            buttonView.tintColor = storeApp.source?.effectiveTintColor?.adjustedForDisplay ?? .altPrimary
-            
-            buttonView.button.setTitle(NSLocalizedString("See All", comment: ""), for: .normal)
-            buttonView.button.titleLabel?.font = UIFont.preferredFont(forTextStyle: .body)
-            buttonView.button.contentEdgeInsets.bottom = 8
-            
-            buttonView.button.removeAction(identifiedBy: .showAllApps, for: .primaryActionTriggered)
-            
-            if let source = storeApp.source
-            {
-                let action = UIAction(identifier: .showAllApps) { [weak self] _ in
-                    self?.showAllApps(for: source)
-                }
-                buttonView.button.addAction(action, for: .primaryActionTriggered)
-            }
-            
-            return buttonView
             
         default: return UICollectionReusableView(frame: .zero)
         }
@@ -609,8 +539,7 @@ extension FeaturedViewController
         let section = Section(rawValue: indexPath.section)
         switch section
         {
-        case _ where section.isFeaturedAppsSection: fallthrough
-        case .recentlyUpdated:
+        case .allApps:
             let appViewController = AppViewController.makeAppViewController(app: storeApp)
             self.navigationController?.pushViewController(appViewController, animated: true)
             
