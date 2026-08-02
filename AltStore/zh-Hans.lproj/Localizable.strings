@@ -43,8 +43,11 @@
 "Categories" = "分类";
 "Featured" = "精选";
 "Search" = "搜索";
-/* The install button uppercases this itself — the key is "Free", not "FREE". */
-"Free" = "免费";
+/* The install button's label. Upstream shows the price ("Free") where the App
+ * Store does; every app here is free, so the word carries no information —
+ * say what the button does instead. It uppercases the value itself, which is
+ * a no-op for Chinese. The key is "Free", not "FREE". */
+"Free" = "安装";
 "See All" = "查看全部";
 "Expires in" = "剩余";
 "Version %@" = "版本 %@";
