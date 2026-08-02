@@ -559,6 +559,18 @@ extension AppManager
             
             dispatchGroup.notify(queue: .global()) {
                 managedObjectContext.perform {
+                    // 重算「有更新」标记。放在这里而不是某个调用方那边:更新列表
+                    // 是按 hasUpdate 这一列取数的(谓词读不到 Swift 计算属性),
+                    // 而这里是刚把新版本信息并进 context、还没交给调用方保存的
+                    // 唯一时点 —— 每条拉源的路径都会经过。
+                    //
+                    // 之前只在 updateAllSources 里算,于是冷启动能看到更新、
+                    // 下拉刷新看不到:下拉刷新走的是 checkForUpdates,直接调
+                    // fetchSources,绕开了那一处。
+                    //
+                    // 失败分支也要算:那边只是部分源出错,调用方照样会保存 context。
+                    InstalledApp.refreshUpdateFlags(in: managedObjectContext)
+
                     if !errors.isEmpty
                     {
                         let sources = Set(sources.compactMap { managedObjectContext.object(with: $0.objectID) as? Source })
@@ -619,10 +631,8 @@ extension AppManager
 //                    debugLog("\n\n\n\(context.updatedObjects)\n\n\n")
 //                    debugLog("\n\n\n\(context.deletedObjects)\n\n\n")
 
-                    // The updates list is fetched with a predicate on the stored
-                    // hasUpdate column, so it has to be recomputed here — this is
-                    // the only point where the available versions have just changed.
-                    InstalledApp.refreshUpdateFlags(in: context)
+                    // hasUpdate 已经在 fetchSources 里算过了,那里是所有拉源路径
+                    // 的必经之处。这里不再重复,免得两处将来各改各的。
 
                     try context.save()
                     

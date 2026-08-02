@@ -90,7 +90,11 @@ public class InstalledApp: BaseEntity, InstalledAppProtocol
     ///
     /// Computed, so it can't be used in a fetch predicate — Core Data would need
     /// a real column. `hasUpdate` is that column, refreshed from this value by
-    /// `refreshUpdateFlags(in:)` after every source update.
+    /// `refreshUpdateFlags(in:)`.
+    ///
+    /// 两处在维护这一列,缺一不可:`fetchSources`(所有拉取新版本信息的路径都
+    /// 经过它)和安装收尾(那里变的是已装版本)。漏掉任何一处,更新列表就会
+    /// 在某个方向上停住 —— 要么新版本一直不出现,要么装完了卡片不消失。
     public var isUpdateAvailable: Bool {
         // Basic validation
         guard isActive,
