@@ -23,7 +23,16 @@ final class SettingsHeaderFooterView: UITableViewHeaderFooterView
         
         self.contentView.layoutMargins = .zero
         self.contentView.preservesSuperviewLayoutMargins = true
-        
+
+        // 分区标题跟上另外两页:发现页用系统的 prominentInsetGroupedHeader
+        // (title2 粗体、label 色),我的应用是 24pt 粗体。设置页原本 14pt 灰色
+        // 小字,三个 tab 里就它像另一个 App。footer 那个 secondaryLabel 不动,
+        // 说明文字本来就该是小号灰色。
+        let descriptor = UIFont.preferredFont(forTextStyle: .title2).fontDescriptor
+        self.primaryLabel.font = UIFont(descriptor: descriptor.withSymbolicTraits(.traitBold) ?? descriptor, size: 0)
+        self.primaryLabel.textColor = .label
+        self.primaryLabel.adjustsFontForContentSizeCategory = true
+
         self.stackView.translatesAutoresizingMaskIntoConstraints = false
         self.contentView.addSubview(self.stackView)
         
