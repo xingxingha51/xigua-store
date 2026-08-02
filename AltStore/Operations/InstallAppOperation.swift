@@ -119,6 +119,11 @@ final class InstallAppOperation: ResultOperation<InstalledApp>, OperationLogging
                     installing = false
                     try await backgroundContext.perform{
                         installedApp.refreshedDate = Date()
+                        // 装完这一版,「有更新」的标记要跟着落下去。hasUpdate 是
+                        // 存下来的列而不是算出来的值(更新列表按谓词取数,谓词
+                        // 读不到 Swift 计算属性),而唯一重算它的地方是拉源之后。
+                        // 不在这里清,卡片会一直挂着,直到下次拉源才消失。
+                        installedApp.hasUpdate = installedApp.isUpdateAvailable
                         try installedApp.managedObjectContext?.save()
                     }
                     self.finish(.success(installedApp))
