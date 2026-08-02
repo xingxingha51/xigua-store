@@ -1,8 +1,11 @@
 #sidestore dependencies
 [submodule "Dependencies/minimuxer"]
     path = Dependencies/minimuxer
-    url = https://github.com/SideStore/minimuxer
-    branch = develop
+    # 我们的分支。上游 isReady() 一律要求 Wi-Fi 接口,蜂窝下直接不给续签,
+    # 那是 AltStore 时代的遗留(当年要连局域网里的 AltServer)。改动只有这
+    # 一处,合并上游时留意 Sources/MinimuxerImpl.swift 的 isReady()。
+    url = https://github.com/xingxingha51/xigua-minimuxer
+    branch = xigua-develop
 [submodule "Dependencies/em_proxy"]
 	path = Dependencies/em_proxy
 	url = https://github.com/SideStore/em_proxy
