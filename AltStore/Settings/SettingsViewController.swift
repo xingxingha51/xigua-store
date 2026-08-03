@@ -363,13 +363,20 @@ final class SettingsViewController: UITableViewController
               let cert = Keychain.shared.signingCertificate,
               let identifier = Keychain.shared.identifier,
               let adiPB = Keychain.shared.adiPb else {
-            #if DEBUG
-            debugLog("\(Keychain.shared.appleIDEmailAddress ?? "Empty email")")
-            debugLog("\(Keychain.shared.appleIDPassword ?? "Empty password")")
-            debugLog("\(Keychain.shared.signingCertificate?.description ?? "Empty cert")")
-            debugLog("\(Keychain.shared.identifier ?? "Empty identifier")")
-            debugLog("\(Keychain.shared.adiPb ?? "Empty adiPb")")
-            #endif
+            // 只报缺了哪一项,不打印内容。原来这里把邮箱、**明文密码**、证书都
+            // 写进日志:debugLog 会落到 consoleLog 的文件里,而设置里「查看错误
+            // 日志」能看、还能导出 —— 一次导出账号失败就可能把密码递出去。
+            //
+            // 原本裹在 #if DEBUG 里,但本项目 Release 配置也定义了 DEBUG,所以它
+            // 一直编在发布版里。那个配置另外修了,这里不再依赖它。
+            let missing = [
+                ("email", Keychain.shared.appleIDEmailAddress == nil),
+                ("password", Keychain.shared.appleIDPassword == nil),
+                ("cert", Keychain.shared.signingCertificate == nil),
+                ("identifier", Keychain.shared.identifier == nil),
+                ("adiPb", Keychain.shared.adiPb == nil),
+            ].filter(\.1).map(\.0)
+            debugLog("exportAccount: keychain 缺少 \(missing.joined(separator: ", "))")
             return nil
         }
         // Carry the server this adi.pb was provisioned against, so whoever

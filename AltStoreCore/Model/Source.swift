@@ -24,11 +24,22 @@ public extension Source
     //
     // Whatever this points at must therefore always list an app whose
     // bundleIdentifier equals this build's own, or updates go silently missing.
+    //
+    // 用 loveipa.com 而不是 *.pages.dev:两个指向同一个 Cloudflare Pages 项目,
+    // 但 pages.dev 在国内经常不通。拉不到源的后果不是报个错就算了 —— 首次启动
+    // 会留下一条占位记录(名字叫 SideStore、开发者 Side Team、日期 distantPast),
+    // 看着像个正常应用,用户根本不知道是没加载出来。而且失败之后没有重试。
     static let altStoreSourceName = "西瓜商店"
-    static let altStoreSourceURL = URL(string: "https://sideloadstore.pages.dev/apps.json")!
+    static let altStoreSourceURL = URL(string: "https://loveipa.com/apps.json")!
 
     // normalized url is the source identifier (or) p-key!
     static let altStoreIdentifier = try! Source.sourceID(from: altStoreSourceURL)
+
+    /// 换域名之前内置的地址。域名进标识,所以老用户库里那条源的 identifier 是按
+    /// 这个算的 —— 不认它的话,按新标识查不到,就会再造一条,变成两条重复的源,
+    /// 而已装应用还挂在老那条上。DatabaseManager 启动时据此把老的那条改过来。
+    static let legacyAltStoreSourceURL = URL(string: "https://sideloadstore.pages.dev/apps.json")!
+    static let legacyAltStoreIdentifier = try! Source.sourceID(from: legacyAltStoreSourceURL)
 
     /// Upstream's source, seeded alongside ours so users still reach the wider
     /// community app catalogue. Not used for self-update.

@@ -388,10 +388,24 @@ private extension DatabaseManager
                 #endif
                 
                 let altStoreSource: Source
-                
-                if let source = Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), Source.altStoreIdentifier), in: context)
+
+                let currentSource = Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), Source.altStoreIdentifier), in: context)
+
+                // 内置源从 pages.dev 换成了 loveipa.com。标识是从地址算的,所以
+                // 老用户库里那条的标识还是旧的:不认它就会按新标识再造一条,变成
+                // 两条重复的源,而已装应用、更新记录都还挂在老那条上。
+                //
+                // 就地改地址(setSourceURL 会连标识一起更新),关系全部保留。
+                // 只在新标识那条还不存在时才改 —— 万一两条都在,改了会撞标识。
+                if currentSource == nil,
+                   let legacy = Source.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(Source.identifier), Source.legacyAltStoreIdentifier), in: context)
                 {
-                    altStoreSource = source
+                    try! legacy.setSourceURL(Source.altStoreSourceURL)
+                    altStoreSource = legacy
+                }
+                else if let currentSource
+                {
+                    altStoreSource = currentSource
                 }
                 else
                 {
