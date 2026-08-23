@@ -154,12 +154,11 @@ private extension FeaturedViewController
         // resignedBundleIdentifier),所以这里能直接比。不走 storeApp.installedApp:
         // 用户可能是从别处装的西瓜多开,那条关系不一定连上。
         let predicate = NSPredicate(format: "%K == %@", #keyPath(InstalledApp.bundleIdentifier), Self.containerBundleID)
-        guard InstalledApp.first(satisfying: predicate, in: context) == nil else { return .recommendContainer }
+        let isInstalled = InstalledApp.first(satisfying: predicate, in: context) != nil
         
-        // 还没装,但源也还没拉下来 —— 没有可跳转的目标,先不显示。一张点不动
-        // 的卡片比没有卡片更糟。
-        guard self.containerStoreApp(in: context) != nil else { return nil }
-        return .recommendInstall
+        // 判定本身在 ContainerTipReusableView.State.resolve 里,那边可以直接测。
+        return .resolve(isContainerInstalled: isInstalled,
+                        isContainerAvailableInStore: self.containerStoreApp(in: context) != nil)
     }
     
     func containerStoreApp(in context: NSManagedObjectContext) -> StoreApp?

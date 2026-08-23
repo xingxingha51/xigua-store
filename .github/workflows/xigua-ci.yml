@@ -66,3 +66,28 @@ jobs:
             -configuration Debug \
             -sdk iphoneos \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+
+      # 测试跑在模拟器上,所以放在 device 编译之后 —— 先跑那个,它才是能拦住
+      # em_proxy 那类静默失败的检查。
+      #
+      # 不写死设备名:runner 镜像换代时 "iPhone 17 Pro" 随时会消失,写死等于
+      # 埋一个以后会莫名其妙红掉的雷。这里挑第一个可用的 iPhone。
+      - name: Pick a simulator
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available --json \
+            | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; print(next(x['udid'] for v in d.values() for x in v if 'iPhone' in x['name']))")
+          if [ -z "$UDID" ]; then
+            echo "::error::找不到可用的 iPhone 模拟器"
+            exit 1
+          fi
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+          xcrun simctl list devices available | grep iPhone | head -5
+
+      - name: Run tests
+        run: |
+          xcodebuild test \
+            -project AltStore.xcodeproj \
+            -scheme XiguaTests \
+            -sdk iphonesimulator \
+            -destination "id=${{ steps.sim.outputs.udid }}"

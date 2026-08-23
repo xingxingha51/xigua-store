@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A9F00000000000000000000D /* SemanticVersion in Frameworks */ = {isa = PBXBuildFile; productRef = A9F00000000000000000000C /* SemanticVersion */; };
+		A9F00000000000000000000B /* AltStoreCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF66EE7E2501AE50007EE018 /* AltStoreCore.framework */; };
 		A8037A0E2F54664300097AF1 /* libem_proxy_swift.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A8037A0D2F54664300097AF1 /* libem_proxy_swift.a */; };
 		A8038ABC2F54684D00097AF1 /* libem_proxy_swift.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A8037A0D2F54664300097AF1 /* libem_proxy_swift.a */; };
 		A8038AC82F54687A00097AF1 /* libem_proxy_static.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A8EB8CBC2F5453CD0094BC01 /* libem_proxy_static.a */; };
@@ -32,6 +34,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		A9F000000000000000000005 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFD247622284B9A500981D42 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BF66EE7D2501AE50007EE018;
+			remoteInfo = AltStoreCore;
+		};
 		0ED4AEC82E6DDB2A0039E2C0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFD247622284B9A500981D42 /* Project object */;
@@ -101,6 +110,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		A9F000000000000000000001 /* XiguaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XiguaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8036EA72F54642D00097AF1 /* libimobiledevice.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libimobiledevice.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		A8037A0D2F54664300097AF1 /* libem_proxy_swift.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libem_proxy_swift.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		A84596F12F7DC4C90000B8CD /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
@@ -248,6 +258,11 @@
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		A9F000000000000000000002 /* XiguaTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = XiguaTests;
+			sourceTree = "<group>";
+		};
 		A8EEC0502F4AF7FB00F2436D /* AltStoreCore */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (174F75012F8B4F4900A53376 /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */, A8EEC0BF2F4AF7FB00F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = AltStoreCore; sourceTree = "<group>"; };
 		A8EEC3482F4B0D8600F2436D /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A8EEC36A2F4B0D8700F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, A8EEC36B2F4B0D8700F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Shared; sourceTree = "<group>"; };
 		A8EEC3B92F4B0EFC00F2436D /* AltWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (A8EEC3CA2F4B0EFC00F2436D /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = AltWidget; sourceTree = "<group>"; };
@@ -258,6 +273,15 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		A9F000000000000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A9F00000000000000000000D /* SemanticVersion in Frameworks */,
+				A9F00000000000000000000B /* AltStoreCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A85A51432F4B4532002E2E11 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -377,6 +401,7 @@
 		BFD247612284B9A500981D42 = {
 			isa = PBXGroup;
 			children = (
+				A9F000000000000000000002 /* XiguaTests */,
 				A8EEC8412F4B146A00F2436D /* AltStore */,
 				A8EEC0502F4AF7FB00F2436D /* AltStoreCore */,
 				A8EEC3B92F4B0EFC00F2436D /* AltWidget */,
@@ -400,6 +425,7 @@
 		BFD2476B2284B9A500981D42 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				A9F000000000000000000001 /* XiguaTests.xctest */,
 				A8037A0D2F54664300097AF1 /* libem_proxy_swift.a */,
 				A8036EA72F54642D00097AF1 /* libimobiledevice.a */,
 				BFD2476A2284B9A500981D42 /* SideStore.app */,
@@ -431,6 +457,29 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		A9F00000000000000000000A /* XiguaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A9F000000000000000000009 /* Build configuration list for PBXNativeTarget "XiguaTests" */;
+			buildPhases = (
+				A9F000000000000000000003 /* Sources */,
+				A9F000000000000000000004 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A9F000000000000000000006 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A9F000000000000000000002 /* XiguaTests */,
+			);
+			name = XiguaTests;
+			packageProductDependencies = (
+				A9F00000000000000000000C /* SemanticVersion */,
+			);
+			productName = XiguaTests;
+			productReference = A9F000000000000000000001 /* XiguaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		A85A51412F4B4532002E2E11 /* em_proxy-swift */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = A85A51452F4B4532002E2E11 /* Build configuration list for PBXNativeTarget "em_proxy-swift" */;
@@ -610,6 +659,7 @@
 			projectRoot = "";
 			targets = (
 				BFD247692284B9A500981D42 /* SideStore */,
+				A9F00000000000000000000A /* XiguaTests */,
 				BF66EE7D2501AE50007EE018 /* AltStoreCore */,
 				BF58047A246A28F7008AE704 /* SideBackup */,
 				BF989166250AABF3002ACF50 /* AltWidgetExtension */,
@@ -699,6 +749,13 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		A9F000000000000000000003 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A85A51422F4B4532002E2E11 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -738,6 +795,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		A9F000000000000000000006 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BF66EE7D2501AE50007EE018 /* AltStoreCore */;
+			targetProxy = A9F000000000000000000005 /* PBXContainerItemProxy */;
+		};
 		0ED4AEC92E6DDB2A0039E2C0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BF58047A246A28F7008AE704 /* SideBackup */;
@@ -766,6 +828,48 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		A9F000000000000000000008 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xiguastore.XiguaTests;
+				PRODUCT_NAME = XiguaTests;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/Frameworks",
+					"@executable_path/Frameworks",
+				);
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A9F000000000000000000007 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xiguastore.XiguaTests;
+				PRODUCT_NAME = XiguaTests;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/Frameworks",
+					"@executable_path/Frameworks",
+				);
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
 		A85A51462F4B4532002E2E11 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1274,6 +1378,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		A9F000000000000000000009 /* Build configuration list for PBXNativeTarget "XiguaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A9F000000000000000000007 /* Debug */,
+				A9F000000000000000000008 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		A85A51452F4B4532002E2E11 /* Build configuration list for PBXNativeTarget "em_proxy-swift" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1393,6 +1506,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		A9F00000000000000000000C /* SemanticVersion */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A82067C22D03E0DE00645C0D /* XCRemoteSwiftPackageReference "SemanticVersion" */;
+			productName = SemanticVersion;
+		};
 		A803924A2F552F4C00097AF1 /* Minimuxer */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A80392492F552F4C00097AF1 /* XCRemoteSwiftPackageReference "minimuxer" */;

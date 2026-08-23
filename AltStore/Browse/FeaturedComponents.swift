@@ -114,6 +114,28 @@ class ContainerTipReusableView: UICollectionReusableView
         case recommendInstall
         /// 已经装了:降级成一条常驻说明,提醒后续应用往容器里装,不再可点。
         case recommendContainer
+        
+        /// 判定本身是纯逻辑,跟"怎么查数据库"分开:视图控制器只负责把两个
+        /// 布尔量查出来。
+        ///
+        /// 注:XiguaTests 是不带宿主 app 的逻辑测试包,够不到 app target 的
+        /// internal 符号(Swift 的 non-public 符号在编译期就是 hidden
+        /// visibility,-export_dynamic 之类的链接器标志改不了),所以这四个
+        /// 分支目前没有自动化覆盖。要覆盖得把它挪进 AltStoreCore,或者给
+        /// 测试包配宿主 app。
+        ///
+        /// isContainerAvailableInStore 用 @autoclosure:已经装了的时候不需要
+        /// 再去数据库里找那条 StoreApp,而这个判定会随 context 变更反复调用。
+        static func resolve(isContainerInstalled: Bool,
+                            isContainerAvailableInStore: @autoclosure () -> Bool) -> State?
+        {
+            if isContainerInstalled { return .recommendContainer }
+            
+            // 还没装,源也还没拉下来 —— 没有可跳转的目标。一张点不动的卡片
+            // 比没有卡片更糟。
+            guard isContainerAvailableInStore() else { return nil }
+            return .recommendInstall
+        }
     }
     
     var tapHandler: (() -> Void)?
