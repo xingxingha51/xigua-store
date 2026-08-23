@@ -745,3 +745,10 @@
 "VPN tunnel iface is up but tunnel peer IP is not yet reachable — VPN may not be routing device traffic correctly." = "VPN 隧道接口已启动,但对端 IP 还不可达 —— VPN 可能没有正确路由设备流量。";
 "本次已登录,可跳过认证" = "本次已登录,可跳过认证";
 "本次尚未登录(冷启动后正常)" = "本次尚未登录(冷启动后正常)";
+
+/* 发现页顶部的引导卡片 */
+"Install XiguaContainer first" = "建议先装「西瓜多开」,其他应用装进它里面";
+"A free Apple account can only run 3 sideloaded apps at once. Apps installed inside the container share its single slot, and one refresh renews them all." = "免费 Apple 账号一台设备最多只能同时装 3 个自签应用。装进西瓜多开的应用共用它这一个名额,装多少个都只算一个;每 7 天续签时也只需刷新它这一个。";
+"Install it now" = "去安装西瓜多开";
+"Install other apps inside XiguaContainer" = "其他应用建议装进「西瓜多开」";
+"Open XiguaContainer and use its Library tab. Apps installed there don't use up your 3 sideloading slots, and refreshing the container renews them all at once." = "打开西瓜多开,在它的「发现」页里安装。装在里面的应用不占用你那 3 个自签名额,续签时刷新西瓜多开这一个,里面的应用会一起续期。";

@@ -48,6 +48,7 @@ extension FeaturedViewController
         case sectionHeader
         case sourceHeader
         case button
+        case containerTip
     }
 }
 
@@ -60,13 +61,24 @@ class FeaturedViewController: UICollectionViewController
     private var searchController: RSTSearchController!
     private var searchBrowseViewController: BrowseViewController!
     
+    // 免费账号一台设备只能同时装 3 个自签应用。装进西瓜多开的应用共用它那一个
+    // 名额,所以第一件事应该是装西瓜多开 —— 但列表里它只是第一行,没人知道
+    // 为什么该先点它,往往先装了别的,占满 3 个才发现装不下。
+    // 装好之后卡片不消失,换成一条常驻说明,提醒后续应用往容器里装。
+    private static let containerBundleID = "com.kdt.livecontainer"
+    private var containerTipState: ContainerTipReusableView.State?
+    
     override func viewDidLoad()
     {
         super.viewDidLoad()
         
         self.title = NSLocalizedString("Browse", comment: "")
         
-        let layout = Self.makeLayout()
+        self.containerTipState = self.computeContainerTipState()
+        NotificationCenter.default.addObserver(self, selector: #selector(FeaturedViewController.managedObjectContextDidChange(_:)),
+                                               name: .NSManagedObjectContextObjectsDidChange, object: DatabaseManager.shared.viewContext)
+        
+        let layout = self.makeLayout()
         self.collectionView.collectionViewLayout = layout
         
         self.dataSource.proxy = self
@@ -80,6 +92,7 @@ class FeaturedViewController: UICollectionViewController
         self.collectionView.register(UICollectionViewListCell.self, forSupplementaryViewOfKind: ElementKind.sectionHeader.rawValue, withReuseIdentifier: ElementKind.sectionHeader.rawValue)
         self.collectionView.register(IconButtonCollectionReusableView.self, forSupplementaryViewOfKind: ElementKind.sourceHeader.rawValue, withReuseIdentifier: ElementKind.sourceHeader.rawValue)
         self.collectionView.register(ButtonCollectionReusableView.self, forSupplementaryViewOfKind: ElementKind.button.rawValue, withReuseIdentifier: ElementKind.button.rawValue)
+        self.collectionView.register(ContainerTipReusableView.self, forSupplementaryViewOfKind: ElementKind.containerTip.rawValue, withReuseIdentifier: ElementKind.containerTip.rawValue)
         
         self.collectionView.backgroundColor = .altBackground
         self.collectionView.directionalLayoutMargins.leading = 20
@@ -107,6 +120,13 @@ class FeaturedViewController: UICollectionViewController
         self.navigationItem.largeTitleDisplayMode = .always
     }
     
+    override func viewWillAppear(_ animated: Bool)
+    {
+        super.viewWillAppear(animated)
+        
+        self.updateContainerTip()
+    }
+    
     override func viewDidAppear(_ animated: Bool) 
     {
         super.viewDidAppear(animated)
@@ -115,15 +135,75 @@ class FeaturedViewController: UICollectionViewController
     }
 }
 
+extension FeaturedViewController
+{
+    @objc fileprivate func managedObjectContextDidChange(_ notification: Notification)
+    {
+        // 不在通知里同步动 UI:此刻 FRC 可能正在处理同一批变更。
+        DispatchQueue.main.async { self.updateContainerTip() }
+    }
+}
+
 private extension FeaturedViewController
 {
-    class func makeLayout() -> UICollectionViewCompositionalLayout
+    func computeContainerTipState() -> ContainerTipReusableView.State?
+    {
+        let context = DatabaseManager.shared.viewContext
+        
+        // InstalledApp.bundleIdentifier 存的是原始 bundle id(重签后的在
+        // resignedBundleIdentifier),所以这里能直接比。不走 storeApp.installedApp:
+        // 用户可能是从别处装的西瓜多开,那条关系不一定连上。
+        let predicate = NSPredicate(format: "%K == %@", #keyPath(InstalledApp.bundleIdentifier), Self.containerBundleID)
+        guard InstalledApp.first(satisfying: predicate, in: context) == nil else { return .recommendContainer }
+        
+        // 还没装,但源也还没拉下来 —— 没有可跳转的目标,先不显示。一张点不动
+        // 的卡片比没有卡片更糟。
+        guard self.containerStoreApp(in: context) != nil else { return nil }
+        return .recommendInstall
+    }
+    
+    func containerStoreApp(in context: NSManagedObjectContext) -> StoreApp?
+    {
+        let predicate = NSPredicate(format: "%K == %@", #keyPath(StoreApp.bundleIdentifier), Self.containerBundleID)
+        return StoreApp.first(satisfying: predicate, in: context)
+    }
+    
+    func updateContainerTip()
+    {
+        let containerTipState = self.computeContainerTipState()
+        guard containerTipState != self.containerTipState else { return }
+        
+        self.containerTipState = containerTipState
+        
+        // 先改状态再 invalidate:sectionProvider 要读新值来决定挂不挂这个 item。
+        self.collectionView.collectionViewLayout.invalidateLayout()
+        
+        // 从「建议安装」换到「建议装进容器」时 item 还在,invalidateLayout
+        // 不会重新 dequeue,得自己把文案换掉。
+        guard let containerTipState else { return }
+        for view in self.collectionView.visibleSupplementaryViews(ofKind: ElementKind.containerTip.rawValue)
+        {
+            (view as? ContainerTipReusableView)?.configure(with: containerTipState)
+        }
+    }
+    
+    func showContainerApp()
+    {
+        guard let storeApp = self.containerStoreApp(in: DatabaseManager.shared.viewContext) else { return }
+        
+        let appViewController = AppViewController.makeAppViewController(app: storeApp)
+        self.navigationController?.pushViewController(appViewController, animated: true)
+    }
+    
+    // 实例方法而非 class func:sectionProvider 要读 containerTipState。
+    // 装完西瓜多开只需 invalidateLayout(),不用重建整个布局对象。
+    func makeLayout() -> UICollectionViewCompositionalLayout
     {
         let config = UICollectionViewCompositionalLayoutConfiguration()
         config.interSectionSpacing = 0
         config.contentInsetsReference = .layoutMargins
         
-        let layout = UICollectionViewCompositionalLayout(sectionProvider: { (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
+        let layout = UICollectionViewCompositionalLayout(sectionProvider: { [weak self] (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
             let section = Section(rawValue: sectionIndex)
             
             let spacing = 10.0
@@ -145,9 +225,21 @@ private extension FeaturedViewController
                 layoutSection.interGroupSpacing = spacing
                 layoutSection.orthogonalScrollingBehavior = .none
                 layoutSection.contentInsets.bottom = interSectionSpacing
-                layoutSection.boundarySupplementaryItems = [
-                    NSCollectionLayoutBoundarySupplementaryItem(layoutSize: titleSize, elementKind: ElementKind.sectionHeader.rawValue, alignment: .topLeading)
-                ]
+                // 顶部只挂一个 boundary item:引导卡片那份自带「全部应用」标题。
+                // 两个同 alignment 的 item 会按估算高度排位,自适应长高后不重排。
+                if self?.containerTipState != nil
+                {
+                    let tipSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(220))
+                    layoutSection.boundarySupplementaryItems = [
+                        NSCollectionLayoutBoundarySupplementaryItem(layoutSize: tipSize, elementKind: ElementKind.containerTip.rawValue, alignment: .topLeading)
+                    ]
+                }
+                else
+                {
+                    layoutSection.boundarySupplementaryItems = [
+                        NSCollectionLayoutBoundarySupplementaryItem(layoutSize: titleSize, elementKind: ElementKind.sectionHeader.rawValue, alignment: .topLeading)
+                    ]
+                }
                 return layoutSection
                 
             default: return nil
@@ -503,6 +595,13 @@ extension FeaturedViewController
             }
             
             return headerView
+            
+        case ElementKind.containerTip.rawValue:
+            let tipView = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: kind, for: indexPath) as! ContainerTipReusableView
+            tipView.tapHandler = { [weak self] in self?.showContainerApp() }
+            tipView.sectionTitle = NSLocalizedString("New & Updated", comment: "")
+            tipView.configure(with: self.containerTipState ?? .recommendInstall)
+            return tipView
             
         case ElementKind.sectionHeader.rawValue:
             // Regular section header
