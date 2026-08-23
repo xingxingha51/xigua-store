@@ -1,0 +1,68 @@
+name: CI
+
+# 上游那几个 workflow 的触发条件跟我们的分支模型对不上,一个都不会跑:
+#   pr.yml      -> pull_request,我们直接推 main
+#   nightly.yml -> push 到 develop
+#   alpha.yml   -> push 到 staging
+#   stable.yml  -> tag [0-9]+.[0-9]+.[0-9]+,我们的 tag 带 v 前缀和 -xigua 后缀
+# 结果是每次推 main 都零验证,要等到手动发版才知道好坏。em_proxy 的产物格式
+# 2026-08-12 变过一次,埋了 11 天没人发现,就是因为这个。
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**.md', 'LICENSE', '.gitignore', '.editorconfig']
+  pull_request:
+    paths-ignore: ['**.md', 'LICENSE', '.gitignore', '.editorconfig']
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Compile for device
+    runs-on: macos-26
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1.6.0
+        with:
+          xcode-version: "26.4"
+
+      - name: Cache SwiftPM
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Developer/Xcode/DerivedData/**/SourcePackages
+          key: spm-ci-${{ hashFiles('**/Package.resolved') }}
+          restore-keys: spm-ci-
+
+      - name: Pin em_proxy prebuilt artifacts
+        run: ./scripts/xigua/pin-em-proxy.sh
+
+      # -sdk iphoneos 是重点,不是图省事用模拟器。EMProxyWrapper.swift 里对
+      # em_proxy 的调用包在 #if targetEnvironment(simulator) 的 #else 分支里 ——
+      # 模拟器构建根本不编译那几行。2026-08-23 那次发版挂掉之前,本地模拟器
+      # 构建一路全绿,正是这个原因。只有 device 架构能覆盖到。
+      #
+      # build 而不是 archive:archive 还要跑打包和 dSYM,对"能不能编过"这个
+      # 问题没有额外信息,却要多花不少时间。
+      # 参数跟 xigua-build.yml 的 Archive 步骤保持一致(去掉 archive 相关的)。
+      # 不加 -destination:那一步就是这么跑通的,而 -sdk 加 generic destination
+      # 会让 em_proxy 的 cargo 构建规则按多个架构各跑一遍,撞出
+      # "Multiple commands produce libem_proxy_static.a"。
+      #
+      # 也不接 grep 过滤输出:grep -v 在过滤掉所有行时返回 1,配上 pipefail
+      # 会把编译成功判成失败。日志啰嗦一点无所谓,判断准确更要紧。
+      - name: Build (iphoneos)
+        run: |
+          xcodebuild build \
+            -project AltStore.xcodeproj \
+            -scheme SideStore \
+            -configuration Debug \
+            -sdk iphoneos \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""

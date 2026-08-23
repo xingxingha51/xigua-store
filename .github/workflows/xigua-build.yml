@@ -68,35 +68,10 @@ jobs:
       - name: Install ldid
         run: brew install ldid
 
-      # em_proxy 的产物是构建时从 SideStore/em_proxy 的 release 下载的,
-      # 子模块里那个 fetch-prebuilt.sh 写死了 `releases/latest`。上游 2026-08-12
-      # 发的 v0.9.2 把产物从四个散件换成了单个 EMProxy.xcframework.zip,于是
-      # 那四个老名字全部 404 —— 而脚本用的是 `wget -O`,下载失败照样把文件
-      # 截成 0 字节,不报错。结果是 em_proxy.swift 变成空文件,编译时报
-      # "module 'em_proxy' has no member named 'start_em_proxy'"。
-      #
-      # 钉在 `build` 这个滚动 tag 上:它是上游改格式之前的那份,四个资产都还
-      # 在,也正是 v0.6.4-xigua.25 当时下到的东西。下完放 .skip-prebuilt-fetch
-      # 标记,让子模块的脚本直接跳过,不再去碰网络。
-      #
-      # 每个文件都验非空 —— 这个坑的全部杀伤力就来自"失败了也不报错"。
+      # 见 scripts/xigua/pin-em-proxy.sh —— 那里有为什么需要这一步的完整说明。
+      # 抽成脚本是因为 xigua-ci.yml 也要用,而且本地开发同样需要跑一次。
       - name: Pin em_proxy prebuilt artifacts
-        working-directory: Dependencies/em_proxy
-        run: |
-          BASE=https://github.com/SideStore/em_proxy/releases/download/build
-          for f in em_proxy.h em_proxy.swift libem_proxy-ios.a libem_proxy-sim.a; do
-            curl -fsSL --retry 3 -o "$f" "$BASE/$f"
-            if [ ! -s "$f" ]; then
-              echo "::error::$f downloaded empty from $BASE/$f"
-              exit 1
-            fi
-            echo "$f: $(wc -c < "$f") bytes"
-          done
-          grep -q 'func start_em_proxy' em_proxy.swift || {
-            echo "::error::em_proxy.swift has no start_em_proxy — upstream asset changed shape"
-            exit 1
-          }
-          touch .skip-prebuilt-fetch-em_proxy
+        run: ./scripts/xigua/pin-em-proxy.sh
 
       - name: Archive (unsigned)
         run: |
