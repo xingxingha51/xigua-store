@@ -375,6 +375,18 @@ final class AuthenticationOperation: ResultOperation<(ALTTeam, ALTCertificate?, 
                 let (account, session) = try await self.authenticate(appleID: appleID, password: password)
                 self.appleIDPassword = password
                 return (account, session)
+            } catch let error as NSError where error.domain == ALTUnderlyingAppleAPIErrorDomain && error.code == -22410 && Self.adiPbIsForeign {
+                // -22410 at the first step: Apple doesn't accept the device. With
+                // an adi.pb this app didn't provision, the likely cause is that its
+                // device identifiers aren't spelled the way they were provisioned
+                // (see AnisetteIdentifierCase). Provision our own and try once
+                // more. That costs a 2FA prompt, and can't repeat: ours is never
+                // discarded here.
+                self.debugLog("[Authentication] Apple refused the device (-22410) with an adi.pb we didn't provision; provisioning our own and retrying")
+                Keychain.shared.adiPb = nil
+                let (account, session) = try await self.authenticate(appleID: appleID, password: password)
+                self.appleIDPassword = password
+                return (account, session)
             } catch ALTAppleAPIError.incorrectCredentials, ALTAppleAPIError.appSpecificPasswordRequired {
                 // Falling back to the login screen here looks identical to having
                 // no credentials at all, which makes an imported account that
@@ -391,6 +403,12 @@ final class AuthenticationOperation: ResultOperation<(ALTTeam, ALTCertificate?, 
         }
     }
     
+    /// An adi.pb is stored that this app didn't provision with its own
+    /// identifier spelling: imported, or kept from 0.6.4-xigua.27.
+    private static var adiPbIsForeign: Bool {
+        Keychain.shared.adiPb != nil && Keychain.shared.adiPbIDCase != AnisetteIdentifierCase.ours.rawValue
+    }
+
     @MainActor
     private func reportSignInFallback(_ reason: String) {
         self.debugLog("[Authentication] Presenting sign-in UI: \(reason)")

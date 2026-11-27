@@ -193,6 +193,13 @@ public class Keychain
 
     @KeychainItem(key: "adiPbClientInfo")
     public var adiPbClientInfo: String?
+
+    /// The letter case `adiPb`'s device identifiers were provisioned with, an
+    /// `AnisetteIdentifierCase` raw value. Apple only accepts them spelled the
+    /// same way. Read it through `AnisetteIdentifierCase.ofStored`, which also
+    /// covers adi.pb from before this was recorded.
+    @KeychainItem(key: "adiPbIDCase")
+    public var adiPbIDCase: String?
     
     // for some reason authenticated cert/session/team is completely not cached, which result in logging in for every request
     // we save it here so when user logs out we can clear cached account/session/team

@@ -102,23 +102,71 @@ public struct AnisetteProvisioner
 
 // MARK: - Device identifiers
 
+/// How the device identifiers derived from an anisette identifier are spelled.
+///
+/// They have to reach Apple exactly as they were when the adi.pb was
+/// provisioned: Apple compares them case-sensitively and refuses the sign-in
+/// with -22410 at its first step otherwise. This app has always used upper
+/// case; isideload, which the helper uses, uses lower case. So adi.pb imported
+/// from the helper must be used with lower case.
+public enum AnisetteIdentifierCase: String
+{
+    case upper
+    case lower
+
+    /// What this app provisions with.
+    public static let ours = AnisetteIdentifierCase.upper
+
+    /// The case of an imported adi.pb.
+    ///
+    /// Files say so from helper 1.0.7 and from this app's own exports. Helper
+    /// 1.0.6 doesn't, but it is the only one that sends `anisetteClientInfo`
+    /// without it, so that marks lower case. Files from older helpers carry
+    /// neither; their adi.pb is replaced on first use anyway (see
+    /// `Keychain.adiPbClientInfo`), so the answer doesn't matter there.
+    public static func ofImport(declared: String?, hasClientInfo: Bool) -> AnisetteIdentifierCase?
+    {
+        if let declared, let parsed = AnisetteIdentifierCase(rawValue: declared.lowercased()) { return parsed }
+        return hasClientInfo ? .lower : nil
+    }
+
+    /// The case of the stored adi.pb (`Keychain.adiPbIDCase`).
+    ///
+    /// 0.6.4-xigua.27 tagged adi.pb with server and identity but not with this,
+    /// so a tagged adi.pb without it comes from that version. Nearly all of
+    /// those were imported from helper 1.0.6, whose one-click install sends the
+    /// account by default, so lower case. If that guess is wrong, sign-in fails
+    /// with -22410 and AuthenticationOperation provisions our own instead.
+    /// Untagged adi.pb is replaced before use, so upper case is moot there.
+    public static func ofStored(declared: String?, hasClientInfoTag: Bool) -> AnisetteIdentifierCase
+    {
+        if let declared, let parsed = AnisetteIdentifierCase(rawValue: declared) { return parsed }
+        return hasClientInfoTag ? .lower : .upper
+    }
+
+    func apply(_ value: String) -> String
+    {
+        self == .upper ? value.uppercased() : value.lowercased()
+    }
+}
+
 public extension AnisetteProvisioner
 {
-    /// `X-Apple-I-MD-LU`: SHA-256 of the identifier, uppercase hex.
-    static func localUserID(for identifier: Data) -> String
+    /// `X-Apple-I-MD-LU`: SHA-256 of the identifier, in hex.
+    static func localUserID(for identifier: Data, case idCase: AnisetteIdentifierCase = .ours) -> String
     {
-        SHA256.hash(data: identifier).map { String(format: "%02X", $0) }.joined()
+        idCase.apply(SHA256.hash(data: identifier).map { String(format: "%02X", $0) }.joined())
     }
 
     /// `X-Mme-Device-Id`: the identifier's 16 bytes read as a UUID.
-    static func deviceID(for identifier: Data) -> String?
+    static func deviceID(for identifier: Data, case idCase: AnisetteIdentifierCase = .ours) -> String?
     {
         guard identifier.count >= 16 else { return nil }
 
         let b = Array(identifier.prefix(16))
         let uuid = UUID(uuid: (b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7],
                                b[8], b[9], b[10], b[11], b[12], b[13], b[14], b[15]))
-        return uuid.uuidString.uppercased()
+        return idCase.apply(uuid.uuidString)
     }
 }
 

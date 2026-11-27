@@ -134,6 +134,40 @@ final class AnisetteProvisionerTests: XCTestCase
         XCTAssertNil(AnisetteProvisioner.deviceID(for: Data(0..<8)))
     }
 
+    /// 电脑助手(isideload)注册设备时用小写。苹果比对这两个值区分大小写:
+    /// 大小写和注册时不一致,登录第一步就报 -22410。从电脑导入的账号就是栽在这里。
+    func testIdentifiersCanBeSpelledTheWayTheHelperProvisionedThem()
+    {
+        let identifier = Data(0..<16)
+        XCTAssertEqual(AnisetteProvisioner.localUserID(for: identifier, case: .lower),
+                       "be45cb2605bf36bebde684841a28f0fd43c69850a3dce5fedba69928ee3a8991")
+        XCTAssertEqual(AnisetteProvisioner.deviceID(for: identifier, case: .lower), "00010203-0405-0607-0809-0a0b0c0d0e0f")
+        XCTAssertEqual(AnisetteIdentifierCase.ours, .upper)
+    }
+
+    /// 导入文件里写明了就照写的;电脑助手 1.0.6 没写,但只有它会带
+    /// anisetteClientInfo 而不带大小写,所以按小写;更早的文件两样都没有,
+    /// 那份 adi.pb 反正会被重新注册替换,不用管。
+    func testImportedIdentifierCase()
+    {
+        XCTAssertEqual(AnisetteIdentifierCase.ofImport(declared: "lower", hasClientInfo: false), .lower)
+        XCTAssertEqual(AnisetteIdentifierCase.ofImport(declared: "UPPER", hasClientInfo: true), .upper)
+        XCTAssertEqual(AnisetteIdentifierCase.ofImport(declared: nil, hasClientInfo: true), .lower)
+        XCTAssertEqual(AnisetteIdentifierCase.ofImport(declared: "garbage", hasClientInfo: true), .lower)
+        XCTAssertNil(AnisetteIdentifierCase.ofImport(declared: nil, hasClientInfo: false))
+    }
+
+    /// xigua.27 存下的 adi.pb 带了服务器和身份标记,但没记大小写。那一版的
+    /// 这类状态几乎都是从电脑助手 1.0.6 导入的,按小写;猜错了登录时会兜底重新注册。
+    /// 没有标记的老 adi.pb 用之前就会被替换,大小写无所谓,按我们自己的大写。
+    func testStoredIdentifierCase()
+    {
+        XCTAssertEqual(AnisetteIdentifierCase.ofStored(declared: "upper", hasClientInfoTag: true), .upper)
+        XCTAssertEqual(AnisetteIdentifierCase.ofStored(declared: "lower", hasClientInfoTag: false), .lower)
+        XCTAssertEqual(AnisetteIdentifierCase.ofStored(declared: nil, hasClientInfoTag: true), .lower)
+        XCTAssertEqual(AnisetteIdentifierCase.ofStored(declared: nil, hasClientInfoTag: false), .upper)
+    }
+
     /// 只有"苹果的查询接口没给地址"跟服务器无关,换服务器没用;其余失败都换下一台。
     func testOnlyLookupFailureIsNotServerSpecific()
     {

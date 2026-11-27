@@ -187,6 +187,7 @@ final class FetchAnisetteDataOperation: ResultOperation<ALTAnisetteData>, Operat
         keychain.adiPb = adiPb
         keychain.adiPbServer = server
         keychain.adiPbClientInfo = self.identity.clientInfo
+        keychain.adiPbIDCase = AnisetteIdentifierCase.ours.rawValue
         self.debugLog("Provisioning succeeded at \(server)")
 
         return try await self.fetchAnisetteV3(identifier: identifier, adiPb: adiPb)
@@ -282,9 +283,12 @@ final class FetchAnisetteDataOperation: ResultOperation<ALTAnisetteData>, Operat
         if let routingInfo = json["X-Apple-I-MD-RINFO"] { formattedJSON["routingInfo"] = routingInfo }
 
         if v3, let identifier {
+            // Spelled as when the adi.pb was provisioned, or Apple answers -22410.
+            let idCase = AnisetteIdentifierCase.ofStored(declared: Keychain.shared.adiPbIDCase,
+                                                         hasClientInfoTag: Keychain.shared.adiPbClientInfo != nil)
             formattedJSON["deviceDescription"] = self.identity.clientInfo
-            formattedJSON["localUserID"] = AnisetteProvisioner.localUserID(for: identifier.data)
-            formattedJSON["deviceUniqueIdentifier"] = AnisetteProvisioner.deviceID(for: identifier.data)
+            formattedJSON["localUserID"] = AnisetteProvisioner.localUserID(for: identifier.data, case: idCase)
+            formattedJSON["deviceUniqueIdentifier"] = AnisetteProvisioner.deviceID(for: identifier.data, case: idCase)
 
             // Generate date stuff on client
             let formatter = DateFormatter()

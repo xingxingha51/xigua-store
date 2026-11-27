@@ -33,6 +33,11 @@ struct ImportedAccount: Codable {
     /// don't say; their adi.pb was provisioned under the server's own identity,
     /// which Apple no longer accepts, and gets replaced on first use.
     let anisetteClientInfo: String?
+
+    /// How the device identifiers were spelled when `adiPB` was provisioned:
+    /// "upper" or "lower" (helper 1.0.7+, and this app's own exports). See
+    /// `AnisetteIdentifierCase.ofImport` for files that don't say.
+    let anisetteIdentifierCase: String?
 }
 
 extension ImportedAccount
@@ -50,6 +55,8 @@ extension ImportedAccount
         keychain.adiPb = self.adiPB
         keychain.adiPbServer = self.anisetteServer.map(XiguaAnisetteServers.normalize)
         keychain.adiPbClientInfo = self.anisetteClientInfo
+        keychain.adiPbIDCase = AnisetteIdentifierCase.ofImport(declared: self.anisetteIdentifierCase,
+                                                               hasClientInfo: self.anisetteClientInfo != nil)?.rawValue
 
         // FetchAnisetteDataOperation starts from menuAnisetteURL, so this puts
         // the issuing server first in line while still falling through to
@@ -63,6 +70,6 @@ extension ImportedAccount
 
     /// For logs: never the password, certificate or adi.pb.
     var logDescription: String {
-        "\(self.email) (anisette server: \(self.anisetteServer ?? "none"), client info: \(self.anisetteClientInfo ?? "none"))"
+        "\(self.email) (anisette server: \(self.anisetteServer ?? "none"), client info: \(self.anisetteClientInfo ?? "none"), identifier case: \(self.anisetteIdentifierCase ?? "unstated"))"
     }
 }

@@ -383,7 +383,9 @@ final class SettingsViewController: UITableViewController
         return ImportedAccount(email: email, password: password, cert: cert, certpass: certpass,
                                local_user: identifier, adiPB: adiPB,
                                anisetteServer: Keychain.shared.adiPbServer ?? UserDefaults.standard.menuAnisetteURL,
-                               anisetteClientInfo: Keychain.shared.adiPbClientInfo)
+                               anisetteClientInfo: Keychain.shared.adiPbClientInfo,
+                               anisetteIdentifierCase: AnisetteIdentifierCase.ofStored(declared: Keychain.shared.adiPbIDCase,
+                                                                                       hasClientInfoTag: Keychain.shared.adiPbClientInfo != nil).rawValue)
     }
     
     func showExportAccount() {
