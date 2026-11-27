@@ -318,23 +318,22 @@ final class SettingsViewController: UITableViewController
         guard let account = try? Foundation.JSONDecoder().decode(ImportedAccount.self, from: accountD) else {
             return debugLog("Could not parse data from file \(file)")
         }
-        debugLog("We want to import this account probably: \(account)")
+        debugLog("We want to import this account probably: \(account.logDescription)")
         if remove {
             try? FileManager.default.removeItem(at: file)
         }
         Keychain.shared.appleIDEmailAddress = account.email
         Keychain.shared.appleIDPassword = account.password
-        Keychain.shared.adiPb = account.adiPB
-        Keychain.shared.identifier = account.local_user
-        // Pin the server that issued this adi.pb. getAnisetteServerUrl() starts
-        // its search from menuAnisetteURL, so this makes the right server first
-        // in line while still falling through to another if it's down.
-        if let server = account.anisetteServer, !server.isEmpty {
-            UserDefaults.standard.menuAnisetteURL = server
-            AnisetteServersManager.shared.addServerIfMissing(server)
+        let pinnedServer = account.storeAnisetteState()
+        Task { @MainActor in
+            // In the list before signing in, or the sign-in starts elsewhere
+            // and provisions afresh instead of using the imported adi.pb.
+            if let pinnedServer {
+                await AnisetteServersManager.shared.addServerIfMissing(pinnedServer)
+            }
+            self.signIn()
+            self.update()
         }
-        signIn()
-        update()
         do {
             let altCert = try ALTCertificate(p12Data: account.cert, password: account.certpass)
             Keychain.shared.signingCertificate = altCert.encryptedP12Data(withPassword: "")!
@@ -379,11 +378,12 @@ final class SettingsViewController: UITableViewController
             debugLog("exportAccount: keychain 缺少 \(missing.joined(separator: ", "))")
             return nil
         }
-        // Carry the server this adi.pb was provisioned against, so whoever
-        // imports it lands on the same one.
+        // Carry where and how this adi.pb was provisioned, so whoever imports
+        // it can tell whether it will work for them.
         return ImportedAccount(email: email, password: password, cert: cert, certpass: certpass,
                                local_user: identifier, adiPB: adiPB,
-                               anisetteServer: UserDefaults.standard.menuAnisetteURL)
+                               anisetteServer: Keychain.shared.adiPbServer ?? UserDefaults.standard.menuAnisetteURL,
+                               anisetteClientInfo: Keychain.shared.adiPbClientInfo)
     }
     
     func showExportAccount() {

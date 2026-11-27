@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>ALTAnisetteURL</key>
-	<string>https://ani.sidestore.io</string>
+	<string>https://new.ani.sidestore.io</string>
 	<key>ALTAppGroups</key>
 	<array>
 		<string>group.$(APP_GROUP_IDENTIFIER)</string>

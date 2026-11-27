@@ -24,7 +24,8 @@ public struct AnisetteServerItem: Codable, Identifiable, Hashable {
 
 public actor AnisetteServersManager {
     public static let shared = AnisetteServersManager()
-    public static let defaultSource = "https://servers.sidestore.io/servers.json"
+    /// Ours, not SideStore's public list (Xigua fork). See XiguaAnisetteServers.
+    public static let defaultSource = XiguaAnisetteServers.listURL
 
     private var inMemoryServersCache: [AnisetteServerItem]?
     private var isSyncing: Bool = false
@@ -73,7 +74,11 @@ public actor AnisetteServersManager {
 
         guard fileManager.fileExists(atPath: targetURL.path),
               let data = try? Data(contentsOf: targetURL) else {
-            return []
+            // Nothing fetched yet, or the file is gone: our built-in list, so a
+            // sign-in doesn't have to wait on reaching the published one.
+            let builtIn = XiguaAnisetteServers.builtIn.map { AnisetteServerItem(name: $0.name, address: $0.address) }
+            inMemoryServersCache = builtIn
+            return builtIn
         }
 
         let decoder = Foundation.JSONDecoder()
@@ -301,6 +306,13 @@ public actor AnisetteServersManager {
             throw NSError(domain: "AnisetteServersManager", code: statusCode, userInfo: [NSLocalizedDescriptionKey: "Request failed with HTTP status \(statusCode)."])
         }
 
+        // Our own list also carries the identity we present to Apple. Only
+        // ours: a list someone else publishes doesn't get to change that.
+        if url.host?.lowercased() == URL(string: XiguaAnisetteServers.listURL)?.host,
+           AnisetteIdentity.applyPublished(serverList: data) {
+            debugLog("[AnisetteServersManager] The published anisette identity changed; the device will provision again under it")
+        }
+
         let decoder = Foundation.JSONDecoder()
         if let serversObj = try? decoder.decode(AnisetteServerData.self, from: data) {
             aniServers.append(contentsOf: serversObj.servers)
@@ -387,8 +399,14 @@ public actor AnisetteServersManager {
 
     // MARK: - Triggered Syncs
 
-    /// Kicks off background sync on app boot if > 24 hours ago OR if previous sync failed/interrupted
+    /// Kicks off background sync on app boot if > 6 hours ago OR if previous sync failed/interrupted
+    ///
+    /// Every 6 hours rather than every 24 (Xigua fork): the list now also
+    /// carries the identity override, and when Apple changes its rules again
+    /// that is how the fix reaches phones that can no longer sign in.
     public func performDailySyncIfNeeded() async {
+        migrateToXiguaListIfNeeded()
+
         if isOfflineMode {
             return
         }
@@ -397,9 +415,9 @@ public actor AnisetteServersManager {
         let lastSuccess = UserDefaults.standard.bool(forKey: lastDailySyncSuccessKey)
         let now = Date().timeIntervalSince1970
 
-        let twentyFourHours: TimeInterval = 24 * 60 * 60
+        let syncInterval: TimeInterval = 6 * 60 * 60
 
-        if !lastSuccess || (now - lastSyncTime >= twentyFourHours) {
+        if !lastSuccess || (now - lastSyncTime >= syncInterval) {
             do {
                 try await syncWithRemote()
                 UserDefaults.standard.set(now, forKey: self.lastDailySyncKey)
@@ -410,6 +428,38 @@ public actor AnisetteServersManager {
                 debugLog("[AnisetteServersManager] Daily boot sync failed for URL '\(UserDefaults.standard.menuAnisetteList)': \(error.localizedDescription)")
             }
         }
+    }
+
+    private let xiguaListMigrationKey = "AnisetteServersManager.xiguaListMigration"
+
+    /// One-time move from SideStore's public list onto ours (Xigua fork).
+    ///
+    /// The old list leads with servers Apple stopped accepting in Nov 2026, and
+    /// the preferred server is usually one of them. Waiting for the next sync to
+    /// sort that out would leave the phone failing until it happened, so the
+    /// local list is reseeded from the built-in one now and the sync is forced
+    /// on this launch. Someone who imported their own file, or pointed the list
+    /// at another URL, chose that on purpose and is left alone.
+    public func migrateToXiguaListIfNeeded() {
+        let defaults = UserDefaults.standard
+        guard defaults.integer(forKey: xiguaListMigrationKey) < 1 else { return }
+        defaults.set(1, forKey: xiguaListMigrationKey)
+
+        // Empty when this runs before UserDefaults.registerDefaults(), which the
+        // app does right after starting the boot sync.
+        let source = defaults.menuAnisetteList
+        guard !isOfflineMode,
+              source.isEmpty || source == XiguaAnisetteServers.legacyListURL || source == XiguaAnisetteServers.listURL
+        else { return }
+
+        defaults.menuAnisetteList = XiguaAnisetteServers.listURL
+
+        let reseeded = XiguaAnisetteServers.reseed(existing: loadLocalServers().map { ($0.address, $0.isHidden) })
+        // Also moves menuAnisetteURL to the first one if it isn't among them.
+        saveLocalServers(reseeded.map { AnisetteServerItem(name: $0.name, address: $0.address, isHidden: $0.isHidden) })
+        defaults.set(false, forKey: lastDailySyncSuccessKey)
+
+        debugLog("[AnisetteServersManager] Moved onto our server list; preferred server is now \(defaults.menuAnisetteURL)")
     }
 
     /// Triggered when FetchAnisetteDataOperation encounters no working server.

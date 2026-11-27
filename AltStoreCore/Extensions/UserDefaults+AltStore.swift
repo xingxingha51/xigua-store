@@ -308,8 +308,10 @@ public extension UserDefaults
             #keyPath(UserDefaults.activeAppLimitIncludesExtensions): activeAppLimitIncludesExtensions,
             #keyPath(UserDefaults.localServerSupportsRefreshing): localServerSupportsRefreshing,
             #keyPath(UserDefaults.requiresAppGroupMigration): true,
-            #keyPath(UserDefaults.menuAnisetteList): "https://servers.sidestore.io/servers.json",
-            #keyPath(UserDefaults.menuAnisetteURL): "https://ani.sidestore.io",
+            // Ours rather than SideStore's public list, which leads with servers
+            // Apple stopped accepting in Nov 2026. See XiguaAnisetteServers.
+            #keyPath(UserDefaults.menuAnisetteList): XiguaAnisetteServers.listURL,
+            #keyPath(UserDefaults.menuAnisetteURL): XiguaAnisetteServers.defaultServer,
             #keyPath(UserDefaults.isCowExploitSupported): isMacDirtyCowSupported,
             #keyPath(UserDefaults.permissionCheckingDisabled): permissionCheckingDisabled,
             #keyPath(UserDefaults._preferredAppSorting): preferredAppSorting.rawValue,

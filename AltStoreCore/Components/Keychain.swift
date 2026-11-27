@@ -182,6 +182,17 @@ public class Keychain
     
     @KeychainItem(key: "adiPb")
     public var adiPb: String?
+
+    /// The anisette server that issued `adiPb`, and the client info it was
+    /// provisioned under (Xigua fork). adi.pb only works with both: replayed at
+    /// another server, or presented with another identity, Apple refuses it
+    /// (-45061 / -22410). FetchAnisetteDataOperation provisions again when
+    /// either doesn't match; nil, as left by older builds, never matches.
+    @KeychainItem(key: "adiPbServer")
+    public var adiPbServer: String?
+
+    @KeychainItem(key: "adiPbClientInfo")
+    public var adiPbClientInfo: String?
     
     // for some reason authenticated cert/session/team is completely not cached, which result in logging in for every request
     // we save it here so when user logs out we can clear cached account/session/team

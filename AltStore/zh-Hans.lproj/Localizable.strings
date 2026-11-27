@@ -237,7 +237,7 @@
 "An error occurred while getting anisette data from a V1 server: %@. Try using another anisette server." = "从 V1 anisette 服务器获取数据时出错:%@。请换一个 anisette 服务器试试。";
 "An error occurred while getting anisette data from a V3 server: %@. Please try again. If the issue persists, report it on GitHub Issues!" = "从 V3 anisette 服务器获取数据时出错:%@。请重试;如果一直不行,请到 GitHub Issues 反馈。";
 "An error occurred while installing the app." = "安装应用时出错。";
-"An error occurred while provisioning: %@ %@. Please try again. If the issue persists, report it on GitHub Issues!" = "配置签名时出错:%1$@ %2$@。请重试;如果一直不行,请到 GitHub Issues 反馈。";
+"An error occurred while provisioning: %@ %@. Please try again. If the issue persists, report it on GitHub Issues!" = "向苹果注册设备时出错:%1$@ %2$@。请重试;如果一直不行,请到 GitHub Issues 反馈。";
 "An error occurred while using SideJIT: %@" = "使用 SideJIT 时出错:%@";
 "An iPad screenshot for %@ does not specify its size" = "%@ 的 iPad 截图没有指定尺寸";
 "An unknown error occured." = "发生未知错误。";
